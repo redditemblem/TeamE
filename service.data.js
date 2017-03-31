@@ -1,5 +1,6 @@
-app.service('DataService', ['$location', function ($location) {
+app.service('DataService', ['$rootScope', function ($rootScope) {
 	var sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
+	var progress = 0;
 	var characters = {};
 	var characterData, itemIndex, skillIndex;
 	
@@ -17,7 +18,7 @@ app.service('DataService', ['$location', function ($location) {
         range: 'Stats!B:ZZ',
       }).then(function(response) {
     	 characterData = response.result.values;
-    	 //updateProgressBar();
+    	 updateProgressBar();
     	 fetchCharacterImages();
       });
     };
@@ -32,9 +33,9 @@ app.service('DataService', ['$location', function ($location) {
       	 
       	 for(var i = 0; i < characterData; i++){
       		 characterData[i][4] = processImageURL(images[i]);
-      	 };
+      	 }
       	 
-      	 //updateProgressBar();
+      	 updateProgressBar();
       	 fetchItemData();
         });
       };
@@ -47,7 +48,7 @@ app.service('DataService', ['$location', function ($location) {
         }).then(function(response) {
           itemIndex = response.result.values;
           itemIndex.splice(0,1); //remove header row
-          //updateProgressBar();
+          updateProgressBar();
           fetchSkillData();
         });
     };
@@ -59,7 +60,7 @@ app.service('DataService', ['$location', function ($location) {
             range: 'Skill List!A2:C',
           }).then(function(response) {
             skillIndex = response.result.values;
-            //updateProgressBar();
+            updateProgressBar();
             fetchSkillImages();
           });
     };
@@ -76,7 +77,7 @@ app.service('DataService', ['$location', function ($location) {
             for(var i = 0; i < skillIndex.length; i++)
             	skillIndex[i][0] = processImageURL(images[i]);
             	
-            //updateProgressBar();
+            updateProgressBar();
             processCharacters();
           });
     };
@@ -158,66 +159,85 @@ app.service('DataService', ['$location', function ($location) {
     		sortWeapons(0,i);
     		
     		//Match weapons
-    		for(var w = 38; w <= 42; w++){
-    			var wpn = findItemInfo(c[w]);
-    			currObj.inventory["wpn_" + (w-37)] = {
-    				'name' : wpn[0],
-    				'type' : wpn[1],
-    				'atkStat' : wpn[2],
-    				'rank' : wpn[3],
-    				'might' : wpn[4],
-    				'hit'   : wpn[5],
-    				'crit'  : wpn[6],
-    				'crit%Mod'   : wpn[7],
-    				'critDmgMod' : wpn[8], 
-    				'avo'   : wpn[9],
-    				'range' : wpn[11],
-    				'effective' : wpn[12],
-    				'StrBuff' : wpn[13],
-    				'MagBuff' : wpn[14],
-    				'SklBuff' : wpn[15],
-    				'SpdBuff' : wpn[16],
-    				'LckBuff' : wpn[17],
-    				'DefBuff' : wpn[18],
-    				'ResBuff' : wpn[19],
-    				'wpnSlots' : wpn[22],
-    				'effect' : wpn[28],
-    				'invHpBuff' : wpn[29],
-    				'invStrBuff' : wpn[30],
-    				'invMagBuff' : wpn[31],
-    				'invSklBuff' : wpn[32],
-    				'invSpdBuff' : wpn[33],
-    				'invLckBuff' : wpn[34],
-    				'invDefBuff' : wpn[35],
-    				'invResBuff' : wpn[36],
-    				'invMovBuff' : wpn[37],
-    				'desc' : wpn[38],
-    				'spriteUrl' : wpn[39]
-    			};
-    		}
+    		for(var w = 38; w <= 42; w++)
+    			currObj.inventory["wpn_" + (w-37)] = getItem(c[w]);
     		
     		//Match skills
-    		for(var s = 49; s <= 56; s++){
-    			var skl = findSkillInfo(c[s]);
-    			currObj.skills["skl_" + (s-48)] = {
-    			   'spriteUrl' : skl[0],
-    			   'name' : skl[1],
-    			   'desc' : skl[2]
-    			};
-    		}
+    		for(var s = 49; s <= 56; s++)
+    			currObj.skills["skl_" + (s-48)] = getSkill(c[s]);
     		
     		characters["char_" + i] = currObj;
     	};
+
+		updateProgressBar();
     };
     
     //\\//\\//\\//\\//\\//
 	// HELPER FUNCTIONS //
 	//\\//\\//\\//\\//\\//
     
+	function updateProgressBar(){
+		if(progress < 100){
+			progress = progress + 17; //6 calls
+    		$rootScope.$broadcast('loading-bar-updated', progress);
+		}
+    };
+
     function processImageURL(str){
     	return str.substring(8, str.length-4);
     };
     
+	function getItem(name){
+		var wpn = findItemInfo(name);
+		return {
+			'name' : wpn[0],
+			'type' : wpn[1],
+			'atkStat' : wpn[2],
+			'rank' : wpn[3],
+			'might' : wpn[4],
+			'hit'   : wpn[5],
+			'crit'  : wpn[6],
+			'crit%Mod'   : wpn[7],
+			'critDmgMod' : wpn[8], 
+			'avo'   : wpn[9],
+			'range' : wpn[11],
+			'effective' : wpn[12],
+			'StrBuff' : wpn[13],
+			'MagBuff' : wpn[14],
+			'SklBuff' : wpn[15],
+			'SpdBuff' : wpn[16],
+			'LckBuff' : wpn[17],
+			'DefBuff' : wpn[18],
+			'ResBuff' : wpn[19],
+			'wpnSlots' : wpn[22],
+			'effect' : wpn[28],
+			'invHpBuff' : wpn[29],
+			'invStrBuff' : wpn[30],
+			'invMagBuff' : wpn[31],
+			'invSklBuff' : wpn[32],
+			'invSpdBuff' : wpn[33],
+			'invLckBuff' : wpn[34],
+			'invDefBuff' : wpn[35],
+			'invResBuff' : wpn[36],
+			'invMovBuff' : wpn[37],
+			'desc' : wpn[38],
+			'spriteUrl' : wpn[39]
+		};
+	};
+
+	function getSkill(name){
+		var skl = findSkillInfo(name);
+		return {
+			'spriteUrl' : skl[0],
+			'name' : skl[1],
+			'desc' : skl[2]
+		};
+	};
+
+	//\\//\\//\\//\\//\\//
+	// SEARCH FUNCTIONS //
+	//\\//\\//\\//\\//\\//
+
     function findItemInfo(itemName){
     	if(itemName.length == 0)
     		return ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"];

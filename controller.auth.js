@@ -60,14 +60,16 @@ app.controller('AuthCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		return request.responseText;
     };
     
-    //Increments the progress bar by %
-    function updateProgressBar(){
-    	bar.value = bar.value + 14.2;
-    };
-
     //Redirect user to the map page once data has been loaded
     function redirect(){
     	$location.path('/map').replace();
     	$scope.$apply();
     };
+
+	$scope.$on('loading-bar-updated', function(event, data) {
+    	bar.value = data;
+		if(data >= 100){
+			redirect();
+		}	
+    });
 }]);
