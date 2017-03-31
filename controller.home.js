@@ -45,7 +45,6 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		$location.path('/');
     	else{
     		$scope.charaData = DataService.getCharacters();
-    		$scope.enemyData = DataService.getEnemies();
     	}
     };
     
@@ -137,25 +136,21 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Returns the image URL for the unit in the back of a pairup
     //0 = charaData, 1 = enemyData
-    $scope.getPairUnitIcon = function(pair, toggle){
-    	var pairedUnit = locatePairedUnit(pair, toggle).unit;
+    $scope.getPairUnitIcon = function(pair){
+    	var pairedUnit = locatePairedUnit(pair).unit;
     	return pairedUnit.spriteUrl;
     };
     
     //Switches char info box to show the stats of the paired unit
     //Triggered when char info box "Switch to Paired Unit" button is clicked
-    $scope.findPairUpChar = function(char, toggle){
-    	var clickedChar;
-    	if(toggle == "0") clickedChar = $scope.charaData[char];
-    	else clickedChar = $scope.enemyData[char];
-    	
-    	var pairedUnit = locatePairedUnit(clickedChar.pairUpPartner, toggle);
+    $scope.findPairUpChar = function(char){
+    	var clickedChar = $scope.charaData[char];
+    	var pairedUnit = locatePairedUnit(clickedChar.pairUpPartner);
     	
     	//Toggle visibility
     	$scope[char + "_displayBox"] = false;
     	$scope[pairedUnit.unitLoc + "_displayBox"] = true;
-    	
-		//var currEnemy = document.getElementById(char);
+
     	var currBox = document.getElementById(char + '_box');
     	var pairBox = document.getElementById(pairedUnit.unitLoc + '_box');
     
@@ -163,25 +158,11 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	pairBox.style.left = currBox.offsetLeft + 'px';
     };
     
-    function locatePairedUnit(unitName, toggle){
-    	var dataList, dataName;
-    	
-    	if(toggle == "0"){
-    		dataList = $scope.charaData;
-    		dataName = "char_";
-    	}else{
-    		dataList = $scope.enemyData;
-    		dataName = "enmy_";
-    	}
-    	
-    	var size = Object.keys(dataList).length;
-    	var found = false;
-    	var inc = 0;
-    	
+    function locatePairedUnit(unitName){
     	//Find paired unit
-    	while(!found && inc < size){
-    		if(dataList[dataName + inc].name == unitName){
-    			pairedUnit = dataList[dataName + inc];
+    	for(var char in $scope.charaData){
+    		if($scope.charaData[char].name == unitName){
+    			pairedUnit = $scope.charaData[char];
     			found = true;
     		}else inc++;
     	}
@@ -269,14 +250,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	box.style.left = x + 'px';
     	box.style.top = y + 'px';
     };
-    
-    $scope.fetchStatVerticalPos = function(index){ return statVerticalPos[index] };
-    $scope.fetchWeaponVerticalPos = function(index){ return weaponVerticalPos[index]; };
-    $scope.fetchWpnRankHorzPos = function(index){ return weaponRankHorzPos[index]; };
-    $scope.fetchWpnDescVerticalPos = function(index){ return weaponDescVerticalPos[index]; };
-    $scope.fetchSklVerticalPos = function(index){ return skillVerticalPos[index]; };
-    $scope.fetchSklDescVerticalPos = function(index){ return skillDescVerticalPos[index]; };
-    
+
     $scope.fetchESklHorzPos = function(index){ return eSkillHorzPos[index]; };
     $scope.fetchEStatVerticalPos = function(index){ return eStatVerticalPos[index]; };
     $scope.fetchEWeaponVerticalPos = function(index){ return eWeaponVerticalPos[index]; };
@@ -300,11 +274,8 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
      * 
      * toggle = 0 for char, 1 for enemy
      */
-    $scope.determineStatColor = function(character, index, stat, toggle){
-    	var char;
-    	
-    	if(toggle == "0") char = $scope.charaData[character];
-    	else char = $scope.enemyData[character];
+    $scope.determineStatColor = function(character, index, stat){
+    	var char = $scope.charaData[character];
     	
     	//Determine appropriate indicies for stat being evaluated (passed string)
     	var debuff = char[stat + "Buff"];
@@ -327,8 +298,8 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	return STAT_DEFAULT_COLOR;
     };
     
-    $scope.calcEnemyBaseStat = function(enemy, stat){
-    	var char = $scope.enemyData[enemy];
+    $scope.calcBaseStat = function(char, stat){
+    	var char = $scope.charaData[char];
     	
     	//Determine appropriate indicies for stat being evaluated (passed string)
     	var total = char[stat];
@@ -394,6 +365,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Returns the icon for the class of the weapon at the index
     //Version for characters
     $scope.getWeaponClassIcon = function(type){
+		if(type == undefined) return "";
     	type = type.toLowerCase();
     	return "IMG/type_" + type + ".png";
     };
@@ -504,20 +476,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	var test = document.getElementById('char_0_box');
     	if($scope.charaData != undefined && test != null){
     		
-    		var i = 0;
     		//Set event listeners to be activated when the div is dragged
     	    for(var char in $scope.charaData){
-    	    	var box = document.getElementById('char_' + i + '_box');
+    	    	var box = document.getElementById(char + '_box');
     	    	box.addEventListener('dragstart',dragStart,false);
-    	    	i++;
-    	    }
-    	    i = 0;
-    	    
-    	    //Set event listeners to be activated when the div is dragged
-    	    for(var enemy in $scope.enemyData){
-    	    	var box = document.getElementById('enmy_' + i + '_box');
-    	    	box.addEventListener('dragstart',dragStart,false);
-    	    	i++;
     	    }
     	    
     	    //Set event listeners
