@@ -1,16 +1,30 @@
 app.service('DataService', ['$rootScope', function ($rootScope) {
 	var sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
 	var progress = 0;
-	var characters = {};
-	var characterData, itemIndex, skillIndex;
+	var characters = null;
+	var map, characterData, itemIndex, skillIndex;
 	
 	this.getCharacters = function(){ return characters; };
-	this.loadMapData = function(){ fetchCharacterData(); };
+	this.getMap = function(){ return map; };
+	this.loadMapData = function(){ fetchMapUrl(); };
 	
 	//\\//\\//\\//\\//\\//
 	// DATA AJAX CALLS  //
 	//\\//\\//\\//\\//\\//
 	
+	function fetchMapUrl(){
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        majorDimension: "ROWS",
+		valueRenderOption: "FORMULA",
+        range: 'Current Map!A1:A5',
+      }).then(function(response) {
+    	 map = processImageURL(response.result.values[4][0]);
+    	 //updateProgressBar();
+    	 fetchCharacterData();
+      });
+	};
+
     function fetchCharacterData() {
       gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
@@ -26,12 +40,13 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     function fetchCharacterImages() {
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: sheetId,
-          majorDimension: "COLUMNS",
+          majorDimension: "ROWS",
+		  valueRenderOption: "FORMULA",
           range: 'Stats!B5:ZZ5',
         }).then(function(response) {
-      	 var images = response.result.values;
+      	 var images = response.result.values[0];
       	 
-      	 for(var i = 0; i < characterData; i++){
+      	 for(var i = 0; i < images.length; i++){
       		 characterData[i][4] = processImageURL(images[i]);
       	 }
       	 
@@ -83,6 +98,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     };
     
     function processCharacters(){
+		characters = {};
     	for(var i = 0; i < characterData.length; i++){
     		var c = characterData[i];
     		var currObj = {
@@ -95,63 +111,62 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
    			 'exp'   : c[6],
    			 'gold'  : c[7],
    			 'position' : c[8],
-   			 'automatonPos' : c[9],
-   			 'currHp': c[11],
-   			 'maxHp' : c[12],
-   			 'pStrBuff' : c[13],
-  			 'pMagBuff' : c[14],
-  			 'pSklBuff' : c[15],
-  			 'pSpdBuff' : c[16],
-  			 'pLckBuff' : c[17],
-  			 'pDefBuff' : c[18],
-  			 'pResBuff' : c[19],
-  			 'pMovBuff' : c[20],
-   			 'Str'   : c[22],
-   			 'Mag'   : c[23],
-   			 'Skl'   : c[24],
-   			 'Spd'   : c[25],
-   			 'Lck'   : c[26],
-   			 'Def'   : c[27],
-   			 'Res'   : c[28],
-   			 'mov'   : c[29],
-   			 'weaknesses' : c[30],
-   			 'atk'  : c[31],
-  			 'hit'  : c[32],
-  			 'crit' : c[33],
-  			 'avo'  : c[34],
-  			 'equippedItem' : c[35],
+   			 'currHp': c[10],
+   			 'maxHp' : c[11],
+   			 'pStrBuff' : c[12],
+  			 'pMagBuff' : c[13],
+  			 'pSklBuff' : c[14],
+  			 'pSpdBuff' : c[15],
+  			 'pLckBuff' : c[16],
+  			 'pDefBuff' : c[17],
+  			 'pResBuff' : c[18],
+  			 'pMovBuff' : c[19],
+   			 'Str'   : c[21],
+   			 'Mag'   : c[22],
+   			 'Skl'   : c[23],
+   			 'Spd'   : c[24],
+   			 'Lck'   : c[25],
+   			 'Def'   : c[26],
+   			 'Res'   : c[27],
+   			 'mov'   : c[28],
+   			 'weaknesses' : c[29],
+   			 'atk'  : c[30],
+  			 'hit'  : c[31],
+  			 'crit' : c[32],
+  			 'avo'  : c[33],
+  			 'equippedItem' : c[36],
    			 'inventory' : {},
-   			 'pairUpPartner' : c[44],
-   			 'stance'  : c[45],
-   			 'shields' : c[46],
+   			 'pairUpPartner' : c[43],
+   			 'stance'  : c[44],
+   			 'shields' : c[45],
    			 'skills' : {},
-   			 'hpBuff'  : c[58],
-   			 'StrBuff' : c[59],
-   			 'MagBuff' : c[60],
-   			 'SklBuff' : c[61],
-   			 'SpdBuff' : c[62],
-   			 'LckBuff' : c[63],
-   			 'DefBuff' : c[64],
-   			 'ResBuff' : c[65],
-   			 'movBuff' : c[66],
-   			 'hitBuff'  : c[67],
-   			 'critBuff' : c[68],
-   			 'avoBuff'  : c[69],
+   			 'hpBuff'  : c[57],
+   			 'StrBuff' : c[58],
+   			 'MagBuff' : c[59],
+   			 'SklBuff' : c[60],
+   			 'SpdBuff' : c[61],
+   			 'LckBuff' : c[62],
+   			 'DefBuff' : c[63],
+   			 'ResBuff' : c[64],
+   			 'movBuff' : c[65],
+   			 'hitBuff'  : c[66],
+   			 'critBuff' : c[67],
+   			 'avoBuff'  : c[68],
    			 'weaponRanks' : {
    				 'w1' : {
-   					'class' : c[76],
-   					'rank'  : c[77],
-   					'exp'   : c[78]
+   					'class' : c[75],
+   					'rank'  : c[76],
+   					'exp'   : c[77]
    				 },
    				 'w2' : {
-   					'class' : c[79],
-  					'rank'  : c[80],
-  					'exp'   : c[81]
+   					'class' : c[78],
+  					'rank'  : c[79],
+  					'exp'   : c[80]
    				 },
    				 'w3' : {
-   					'class' : c[82],
-  					'rank'  : c[83],
-  					'exp'   : c[84]
+   					'class' : c[81],
+  					'rank'  : c[82],
+  					'exp'   : c[83]
    				 }
    			 }
     		};
@@ -159,12 +174,12 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     		sortWeapons(0,i);
     		
     		//Match weapons
-    		for(var w = 38; w <= 42; w++)
-    			currObj.inventory["wpn_" + (w-37)] = getItem(c[w]);
+    		for(var w = 37; w < 42; w++)
+    			currObj.inventory["wpn_" + (w-36)] = getItem(c[w]);
     		
     		//Match skills
-    		for(var s = 49; s <= 56; s++)
-    			currObj.skills["skl_" + (s-48)] = getSkill(c[s]);
+    		for(var s = 48; s < 56; s++)
+    			currObj.skills["skl_" + (s-47)] = getSkill(c[s]);
     		
     		characters["char_" + i] = currObj;
     	};

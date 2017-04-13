@@ -1,5 +1,5 @@
 app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', function ($scope, $location, $interval, DataService) {
-	const rowNames = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "@", "#", "$", "%", "&", "=", "+", "~", ";", ">"];
+	const rowNames = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "MM", "NN", "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "VV", "WW", "XX", "YY", "ZZ"];
 	var onLoad = checkData();
 	$scope.rows = ["A"];
     $scope.columns = ["1"];
@@ -45,6 +45,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		$location.path('/');
     	else{
     		$scope.charaData = DataService.getCharacters();
+			$scope.mapUrl = DataService.getMap();
     	}
     };
     
@@ -53,6 +54,9 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     // GLOW BOXES              \\
     //*************************\\
     
+    const boxWidth = 31;
+	const gridWidth = 1;
+
     /* Using the height of the map image, calculates the number of tiles tall
      * the map is and returns a subsection of the rowNames array of that size.
      * Called every 250 ms for the first 5 seconds the app is open.
@@ -62,9 +66,9 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	if(map != null){
     		var height = map.naturalHeight; //calculate the height of the map
         	
-        	height -= 36;
-        	height = height / 34;
-        	var temp = rowNames.slice(0, height+1);
+        	height -= (boxWidth * 2);
+        	height = height / (boxWidth + gridWidth);
+        	var temp = rowNames.slice(0, height);
         	
         	if(temp.length != 0){
         		$interval.cancel(rowTimer); //cancel $interval timer
@@ -82,8 +86,8 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	if(map != null){
     		var width = map.naturalWidth; //calculate the height of the map
         	
-        	width -= 36;
-        	width = width / 34;
+        	width -= (boxWidth * 3);
+        	width = width / (boxWidth + gridWidth);
         	var temp = [];
         	
         	for(var i = 0; i < width; i++)
@@ -98,12 +102,12 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Returns the vertical position of a glowBox element
     $scope.determineGlowY = function(index){
-    	return (((index+1)*34)+2) + "px";
+    	return (index * (boxWidth + gridWidth)) + (boxWidth + (gridWidth * 2)) + "px";
     };
     
     //Returns the horizontal position of a glowBox element
     $scope.determineGlowX = function(index){
-    	return (index*34) + "px";
+    	return (index * (boxWidth + gridWidth)) + "px";
     };
     
     //*************************\\
@@ -131,7 +135,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.isPaired = function(pairUpPartner){
-    	return pairUpPartner != "None";
+    	return pairUpPartner != "";
     };
     
     //Returns the image URL for the unit in the back of a pairup
@@ -159,15 +163,16 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     function locatePairedUnit(unitName){
+		var unit = null;
+
     	//Find paired unit
     	for(var char in $scope.charaData){
     		if($scope.charaData[char].name == unitName){
-    			pairedUnit = $scope.charaData[char];
-    			found = true;
-    		}else inc++;
+    			unit = char; break;
+    		}
     	}
     	
-    	return {'unit' : dataList[dataName + inc], 'unitLoc' : dataName + inc };
+    	return {'unit' : $scope.charaData[unit], 'unitLoc' : unit };
     };
     
     //Parses an enemy's name to see if it contains a number at the end.
@@ -182,12 +187,13 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.validPosition = function(pos){
-    	return pos != "";
+    	return true; //pos != "";
     };
     
     //Using a character's coordinates, calculates their horizontal
     //position on the map
     $scope.determineCharX = function(pos){
+		return "0px";
     	pos = pos.substring(1,pos.length); //grab last 1-2 chars
     	pos = parseInt(pos);
     	return ((pos*34)+2) + "px";
@@ -196,6 +202,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Using a character's coordinates, calculates their vertical
     //position on the map
     $scope.determineCharY = function(pos){
+		return "0px";
     	pos = pos.substring(0,1); //grab first char
     	pos = parseInt(getPosLetterEquivalent(pos));
     	return ((pos*34)+2) + "px";
@@ -234,7 +241,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Relocate the information box relative to the clicked char
     function positionCharBox(char){
     	var sprite = document.getElementById(char);
-    	var box = document.getElementById(char+'_box');
+    	var box = document.getElementById(char + '_box');
     	
 		var x = sprite.style.left;
     	var y = sprite.style.top;

@@ -103,8 +103,8 @@ img{
 
 .glowBox{
 	position:absolute;
-	height:32px;
-	width:32px;
+	height:31px;
+	width:31px;
 	display:inline-block;
 }
 
@@ -114,7 +114,7 @@ img{
 }
 
 .glowBoxIndent{
-	margin-left:36px;
+	margin-left:33px;
 }
 
 .absolutePos{
