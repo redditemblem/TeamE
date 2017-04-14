@@ -206,7 +206,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 		var wpn = findItemInfo(name);
 		return {
 			'name' : wpn[0],
-			'type' : wpn[1],
+			'class' : wpn[1],
 			'atkStat' : wpn[2],
 			'rank' : wpn[3],
 			'might' : wpn[4],

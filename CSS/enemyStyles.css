@@ -2,7 +2,7 @@
 	position: absolute;
 	background-color: #DAAC5E;
 	width:483px;
-	height:173px;
+	height:240px;
 	font-family: "Verdana";
 	font-size:14px;
 	box-shadow: 1px 1px 10px black;
@@ -92,15 +92,28 @@
 }
 
 .enemyNamePos{
-	width:185px;
-	height:38px;
-	margin-left:5px;
-	margin-top:5px;
+	width:238px;
+	height:30px;
+	left:241px;
+	top:5px;
+	padding-top:3px;
+	font-size:22px;
 }
 
-.enemyHpMovPos{
-	margin-top:48px;
-	height:19px;
+.enemyClassPos{
+	width:230px;
+	height:18px;
+	left:241px;
+	top:43px;
+	padding: 3px;
+	font-size: 14px;
+}
+
+.enemyHpPos{
+	width:165px;
+	left:241px;
+	top:73px;
+	height:45px;
 }
 
 .enemyAtkHitPos{

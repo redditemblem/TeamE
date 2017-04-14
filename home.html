@@ -38,9 +38,66 @@
 			</div>
 		</div>
 		<!--Name-->
-		<div class="infoElement navy whiteText enemyNamePos">
-			<span class="boldText popOutText" style="margin-top:5px">{{char.name}}</span><br>
-			<span class="popOutText">Lv. {{char.level}} {{char.class}}</span>
+		<div class="infoElement navy whiteText enemyNamePos" style="text-align: center">
+			{{char.name}}
+		</div>
+		<!--Class-->
+		<div class="infoElement paleTan redText enemyClassPos">
+			<span style="float: left;">{{char.class}}</span>
+			<span style="float: right;">Lvl. {{char.level}}</span>
+		</div>
+		<!--Current EXP-->
+		<div class="infoElement paleTan redText movExpPos" style="top:74px;">
+			<span class="indentedExpMovLabel">EXP</span>
+			<span class="indentedExpMovText">{{char.exp}}</span>
+		</div>
+		<!--Movement-->
+		<div class="infoElement paleTan redText movExpPos" style="top:97px;">
+			<span class="indentedExpMovLabel"><img src="IMG/movement.png" style="display:inline-block"></span>
+			<span class="indentedExpMovText">{{char.mov}}</span>
+		</div>
+		<!--HP-->
+		<div class="infoElement darkTan tanText enemyHpPos">
+			<span class="HPText">HP</span>
+			<span class="currHPText">{{char.currHp}}</span>
+			<span class="totalHPText"> / {{char.maxHp}}</span>
+		</div>
+		<!--Attack-->
+		<div class="infoElement darkTan tanText atkHitPos" style="top:123px">
+			<span class="indentedStatLabel">Atk</span>
+			<span class="largeIndentedStat" ng-if="checkRate(char.atk)">{{char.atk}}</span>
+			<span class="largeIndentedStat" ng-if="!checkRate(char.atk)">-</span>
+		</div>
+		<!--Critical-->
+		<div class="infoElement darkTan tanText critAvoPos" style="top:123px">
+			<span class="indentedStatLabel">Crit</span>
+			<span class="largeIndentedStat" ng-if="checkRate(char.crit)">{{char.crit}}</span>
+			<span class="largeIndentedStat" ng-if="!checkRate(char.crit)">-</span>
+		</div>
+		<!--Hit-->
+		<div class="infoElement darkTan tanText atkHitPos" style="top:148px">
+			<span class="indentedStatLabel">Hit</span>
+			<span class="largeIndentedStat" ng-if="checkRate(char.hit)">{{char.hit}}</span>
+			<span class="largeIndentedStat" ng-if="!checkRate(char.hit)">-</span>
+		</div>
+		<!--Avoid-->
+		<div class="infoElement darkTan tanText critAvoPos" style="top:148px">
+			<span class="indentedStatLabel">Avo</span>
+			<span class="largeIndentedStat" ng-if="checkRate(char.avo)">{{char.avo}}</span>
+			<span class="largeIndentedStat" ng-if="!checkRate(char.avo)">-</span>
+		</div>
+
+		<!--Inventory-->
+		<div ng-repeat="weapon in char.inventory" ng-mouseenter="weaponHoverIn(cIndex, $index)" ng-mouseleave="weaponHoverOut(cIndex, $index)" class="infoElement redText hoverTan itemsPos" ng-class="$index == 0 ? 'lightTan' : 'paleTan'" ng-style="{top: fetchEWeaponVerticalPos($index)}">
+			<span class="indentedWeaponIcon" ng-if="validWeapon(weapon.name)"><img ng-src="{{weapon.spriteUrl}}" style="height:16px; width:16px;"/></span>
+			<span class="indentedWeaponName" ng-if="validWeapon(weapon.name)">{{weapon.name}}</span>
+			<div class="weaponEffectIcons">
+				<img ng-if="weaponEffective(weapon.effective,'armor')" src="IMG/eff_armor.png">
+				<img ng-if="weaponEffective(weapon.effective,'flying')" src="IMG/eff_flying.png">
+				<img ng-if="weaponEffective(weapon.effective,'beast')" src="IMG/eff_beast.png">
+				<img ng-if="weaponEffective(weapon.effective,'dragon')" src="IMG/eff_dragon.png">
+				<img ng-if="weaponEffective(weapon.effective,'monster')" src="IMG/eff_monster.png">
+			</div>
 		</div>
 	</div>
 </div>

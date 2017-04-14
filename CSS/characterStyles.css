@@ -52,8 +52,8 @@
 .indentedStatLabel{
 	position: absolute;
 	font-size:12px;
-	left:10px;
-	top:5px;
+	left:20px;
+	top:2px;
 }
 
 .indentedStat{
@@ -64,28 +64,31 @@
 
 .largeIndentedStat{
 	position: absolute;
-	left:60px;
-	top:2px;
+	font-size: 14px;
+	left:65px;
+	top:1px;
 }
 
 .indentedWeaponName{
 	position: absolute;
 	left:31px;
-	top:5px;
+	top:4px;
 }
 
 .indentedWeaponIcon{
 	position: absolute;
 	left:10px;
-	top:7px;
+	top:6px;
+	height:16px;
+	width:16px;
 	display:inline-block;
 }
 
 .weaponEffectIcons{
 	position: absolute;
-	left:150px;
-	top:6px;
-	width:90px;
+	left:130px;
+	top:4px;
+	width:95px;
 	display:inline-block;
 	text-align:right;
 }
@@ -99,34 +102,35 @@
 .indentedExpMovLabel{
 	position: absolute;
 	font-size:12px;
-	left:25px;
-	top:5px;
+	left:20px;
+	top:4px;
 }
 
 .indentedExpMovText{
 	position: absolute;
+	font-size:14px;
 	left:55px;
-	top:3px;
+	top:2px;
 }
 
 .HPText{
 	font-size:12px;
 	position: absolute;
 	left:15px;
-	top:20px;
+	top:15px;
 }
 
 .currHPText{
-	font-size:35px;
+	font-size:30px;
 	position: absolute;
-	left:40px;
+	left:50px;
 	top:5px;
 }
 
 .totalHPText{
-	font-size:25px;
+	font-size:20px;
 	position: absolute;
-	left:90px;
+	left:100px;
 	top:10px;
 }
 
@@ -177,20 +181,20 @@
 
 .atkHitPos{
 	width:130px;
-	left:10px;
-	height:26px;
+	left:241px;
+	height:20px;
 }
 
 .critAvoPos{
 	width:120px;
-	left:120px;
-	height:26px;
+	left:351px;
+	height:20px;
 }
 
 .movExpPos{
 	width:85px;
-	left:155px;
-	height:25px;
+	left:391px;
+	height:20px;
 }
 
 .HpPos{
@@ -233,9 +237,9 @@
 }
 
 .itemsPos{
-	width:250px;
-	left:345px;
-	height:30px;
+	width:231px;
+	left:5px;
+	height:25px;
 }
 
 .itemInfoPos{

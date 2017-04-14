@@ -18,17 +18,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     var colTimer = $interval(calcNumColumns, 250, 20);
     var dragNDrop = $interval(initializeListeners, 250, 20);
     
-    //Positioning constants
-    const statVerticalPos = ["10px", "39px", "68px", "97px", "126px", "155px", "184px"];
-    const weaponVerticalPos = ["10px", "45px", "80px", "115px", "150px"];
-    const weaponRankHorzPos = ["345px", "395px", "445px"];
-    const weaponDescVerticalPos = ["10px", "35px", "60px", "85px", "105px"];
-    const skillVerticalPos = ["7px", "30px", "53px", "76px", "99px", "122px", "144px", "167px", "189px"];
-    const skillDescVerticalPos = ["5px", "15px", "22px", "29px", "36px", "43px", "50px", "57px", "63px"];
-    
+	//Positioning constants
     const eSkillHorzPos = ["3px", "24px", "45px", "66px", "87px", "108px", "129px", "150px", "171px"];
     const eStatVerticalPos = ["5px", "29px", "53px", "77px", "101px", "125px", "149px"];
-    const eWeaponVerticalPos = ["5px", "34px", "63px", "92px", "121px"];
+    const eWeaponVerticalPos = ["5px", "35px", "65px", "95px", "125px"];
     const eWpnRankHorzPos = ["297px", "364px", "431px"];
     const eSklDescHorzPos = ["5px", "26px", "47px", "68px", "89px", "110px", "131px", "150px", "169px"];
     const eWpnDescVerticalPos = ["5px", "20px", "40px", "55px", "65px"];
@@ -187,51 +180,30 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.validPosition = function(pos){
-    	return true; //pos != "";
+    	return pos != "";
     };
     
     //Using a character's coordinates, calculates their horizontal
     //position on the map
     $scope.determineCharX = function(pos){
-		return "0px";
-    	pos = pos.substring(1,pos.length); //grab last 1-2 chars
+    	pos = pos.match(/[0-9]+/g)[0];
     	pos = parseInt(pos);
-    	return ((pos*34)+2) + "px";
+    	return (pos * (boxWidth + gridWidth)) + "px";
     };
-    
+
     //Using a character's coordinates, calculates their vertical
     //position on the map
     $scope.determineCharY = function(pos){
-		return "0px";
-    	pos = pos.substring(0,1); //grab first char
+		pos = pos.match(/[a-zA-Z]+/g)[0];
     	pos = parseInt(getPosLetterEquivalent(pos));
-    	return ((pos*34)+2) + "px";
-    };
-    
-    $scope.determineCharZIndex = function(pos){
-    	pos = pos.substring(0,1); //grab first char
-    	return getPosLetterEquivalent(pos);
+    	return (pos * (boxWidth + gridWidth)) + gridWidth + "px";
     };
     
     function getPosLetterEquivalent(letter){
-    	if(letter.match(/[A-Z]/i)) //If pos is a letter
-    		return letter.charCodeAt(0) - 64;
-    	
-    	switch(letter){
-    		case '@': letter = 27; break;
-    		case '#': letter = 28; break;
-    		case '$': letter = 29; break;
-    		case '%': letter = 30; break;
-    		case '&': letter = 31; break;
-    		case '=': letter = 32; break;
-    		case '+': letter = 33; break;
-    		case '~': letter = 34; break;
-    		case ';': letter = 35; break;
-    		case '>': letter = 36; break;
-    		default: letter = 0; break;
-    	}
-    	
-    	return letter;
+    	if(letter.length == 1) 
+    		return letter.charCodeAt(0) - 64; //single letter
+    	else
+			return letter.charCodeAt(0) - 38; //double letter
     };
     
     //***********************\\
@@ -365,7 +337,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Checks to see if the weapon name in the passed slot is null
     //Version for characters
     $scope.validWeapon = function(weaponName){
-    	if(weaponName != "-" && weaponName != "- (-)" && weaponName != "") return true;
+    	if(weaponName != "-") return true;
     	else return false;
     };
     
