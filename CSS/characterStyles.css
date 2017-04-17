@@ -29,7 +29,7 @@
 .weaponRankLtrPos{
 	position: absolute;
 	left: 20px;
-	bottom: 2px;
+	bottom: 3px;
 }
 
 .weaponRankBar{
@@ -51,15 +51,16 @@
 
 .indentedStatLabel{
 	position: absolute;
-	font-size:12px;
-	left:20px;
-	top:2px;
+	font-size:10px;
+	left:12px;
+	top:3px;
 }
 
 .indentedStat{
 	position: absolute;
-	left:50px;
-	top:2px;
+	font-size:14px;
+	left:40px;
+	top:0px;
 }
 
 .largeIndentedStat{
@@ -156,21 +157,20 @@
 
 .skillGemPos{
 	width:16px;
-	left:603px;
+	top: 214px;
 	height:16px;
 }
 
 .skillGemInfoPos{
 	overflow-y: hidden;
 	width:250px;
-	left:350px;
+	top:59px;
 	height:150px;
 }
 
 .statsPos{
-	width:85px;
-	left:250px;
-	height:24px;
+	width:75px;
+	height:18px;
 }
 
 .statInfoPos{
@@ -187,7 +187,7 @@
 
 .critAvoPos{
 	width:120px;
-	left:351px;
+	left:356px;
 	height:20px;
 }
 
@@ -232,7 +232,7 @@
 
 .weaponRankPos{
 	width:35px;
-	top:188px;
+	top:158px;
 	height:24px;
 }
 
@@ -245,8 +245,8 @@
 .itemInfoPos{
 	font-size:12px;
 	width:240px;
-	left:100px;
-	height:110px;
+	left:240px;
+	height:150px;
 }
 
 .charNamePos{

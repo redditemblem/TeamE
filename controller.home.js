@@ -19,11 +19,11 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     var dragNDrop = $interval(initializeListeners, 250, 20);
     
 	//Positioning constants
-    const eSkillHorzPos = ["3px", "24px", "45px", "66px", "87px", "108px", "129px", "150px", "171px"];
-    const eStatVerticalPos = ["5px", "29px", "53px", "77px", "101px", "125px", "149px"];
+    const eSkillHorzPos = ["14px", "41px", "68px", "95px", "122px", "149px", "176px", "203px"];
+    const eStatVerticalPos = ["172px", "195px", "218px", "172px", "195px", "218px", "172px"];
     const eWeaponVerticalPos = ["5px", "35px", "65px", "95px", "125px"];
-    const eWpnRankHorzPos = ["297px", "364px", "431px"];
-    const eSklDescHorzPos = ["5px", "26px", "47px", "68px", "89px", "110px", "131px", "150px", "169px"];
+    const eWpnRankHorzPos = ["15px", "105px", "195px"];
+    const eSklDescHorzPos = ["4px", "31px", "58px", "85px", "112px", "139px", "166px", "193px"];
     const eWpnDescVerticalPos = ["5px", "20px", "40px", "55px", "65px"];
     
     //Constants
@@ -128,7 +128,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.isPaired = function(pairUpPartner){
-    	return pairUpPartner != "";
+    	return false; //pairUpPartner != "";
     };
     
     //Returns the image URL for the unit in the back of a pairup
@@ -167,6 +167,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	
     	return {'unit' : $scope.charaData[unit], 'unitLoc' : unit };
     };
+	
+	$scope.isNotEnemy = function(cIndex){
+		return cIndex.indexOf("enmy") == -1;
+	};
     
     //Parses an enemy's name to see if it contains a number at the end.
     //If it does, it returns that number
@@ -232,6 +236,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
 
     $scope.fetchESklHorzPos = function(index){ return eSkillHorzPos[index]; };
     $scope.fetchEStatVerticalPos = function(index){ return eStatVerticalPos[index]; };
+	$scope.fetchEStatHorzPos = function(index){ var i = parseInt(index); var val; i <= 2 ? val = "241px" : (i <= 5 ? val ="321px" : val = "401px"); return val;}
     $scope.fetchEWeaponVerticalPos = function(index){ return eWeaponVerticalPos[index]; };
     $scope.fetchEWpnRankHorzPos = function(index){ return eWpnRankHorzPos[index]; };
     $scope.fetchESklDescHorzPos = function(index){ return eSklDescHorzPos[index]; };
@@ -296,7 +301,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.validSkill = function(skill){
-    	return skill != "-" && skill != "";
+    	return skill != "-";
     };
 
     //Returns the image for a character's skill, if they're at the minimum
@@ -307,10 +312,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	
     	if(skillName == "-" || minLvl > parseInt(charLvl))
     		return "IMG/SKL/skl_blank.png";
-    	
-    	if(index == "0")
-    		return "IMG/SKL/skl_personal.png";
-    	
+
     	skillName = skillName.toLowerCase();
     	skillName = skillName.replace(/ /g,"_");
     	return "IMG/SKL/skl_" + skillName + ".png";
@@ -357,7 +359,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
     
     $scope.existsWeapon = function(weaponName){
-    	return weaponName != "" && weaponName != "N/A";
+    	return weaponName != "-";
     };
     
     //Returns the weapon rank icon relevant to the passed weapon type
@@ -392,13 +394,18 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Returns true if the weapon at the index is not an item
     $scope.notItem = function(type){
-    	return type != "Item" && type != "Gold" && type != "Unknown";
+    	return type != "Item" && type != "Forge Stone";
     };
     
     $scope.setDescriptionLoc = function(type){
-    	if(type != "Item" && type != "Gold" && type != "Unknown") return "60px";
+    	if(type != "Item" && type != "Forge Stone") return "60px";
     	else return "25px";
     };
+
+	$scope.setItemDescHeight = function(type){
+		if(type != "Item" && type != "Forge Stone") return "80px";
+    	else return "118px";
+	};
     
     //***************************\\
     // MOUSEOVER/MOUSEOUT EVENTS \\

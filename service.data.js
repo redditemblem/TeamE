@@ -2,7 +2,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 	var sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
 	var progress = 0;
 	var characters = null;
-	var map, characterData, itemIndex, skillIndex;
+	var map, characterData, enemyData, itemIndex, skillIndex;
 	
 	this.getCharacters = function(){ return characters; };
 	this.getMap = function(){ return map; };
@@ -20,7 +20,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
         range: 'Current Map!A1:A5',
       }).then(function(response) {
     	 map = processImageURL(response.result.values[4][0]);
-    	 //updateProgressBar();
+    	 updateProgressBar();
     	 fetchCharacterData();
       });
 	};
@@ -37,6 +37,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
       });
     };
     
+	
     function fetchCharacterImages() {
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: sheetId,
@@ -48,6 +49,37 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
       	 
       	 for(var i = 0; i < images.length; i++){
       		 characterData[i][4] = processImageURL(images[i]);
+      	 }
+      	 
+      	 updateProgressBar();
+      	 fetchEnemyData();
+        });
+      };
+
+	   function fetchEnemyData() {
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        majorDimension: "COLUMNS",
+        range: 'Enemy Stats!B:ZZ',
+      }).then(function(response) {
+    	 enemyData = response.result.values;
+    	 updateProgressBar();
+    	 fetchEnemyImages();
+      });
+    };
+    
+	
+    function fetchEnemyImages() {
+        gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: sheetId,
+          majorDimension: "ROWS",
+		  valueRenderOption: "FORMULA",
+          range: 'Enemy Stats!B4:ZZ4',
+        }).then(function(response) {
+      	 //var images = response.result.values[0];
+      	 
+      	 for(var i = 0; i < enemyData.length; i++){
+      		 enemyData[i][3] = "IMG/kitsune.gif"; //processImageURL(images[i]);
       	 }
       	 
       	 updateProgressBar();
@@ -185,15 +217,101 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     	};
 
 		updateProgressBar();
+		processEnemies();
     };
-    
+
+	 function processEnemies(){
+    	for(var i = 0; i < enemyData.length; i++){
+    		var c = enemyData[i];
+			if(c[0] != ""){
+				var currObj = {
+				'name'  : c[0],
+				'class' : c[1],
+				'unitType' : c[2],
+				'spriteUrl' : c[3],
+				'currHp': c[5],
+				'maxHp' : c[6],
+				'pStrBuff' : c[7],
+				'pMagBuff' : c[8],
+				'pSklBuff' : c[9],
+				'pSpdBuff' : c[10],
+				'pLckBuff' : c[11],
+				'pDefBuff' : c[12],
+				'pResBuff' : c[13],
+				'pMovBuff' : c[14],
+				'Str'   : c[16],
+				'Mag'   : c[17],
+				'Skl'   : c[18],
+				'Spd'   : c[19],
+				'Lck'   : c[20],
+				'Def'   : c[21],
+				'Res'   : c[22],
+				'mov'   : c[23],
+				'level' : c[24],
+				'position' : c[25],
+				'atk'  : c[26],
+				'hit'  : c[27],
+				'crit' : c[28],
+				'avo'  : c[29],
+				'weaknesses' : c[32],
+				'equippedItem' : c[33],
+				'inventory' : {},
+				'pairUpPartner' : c[58],
+				'stance'  : c[59],
+				'shields' : c[60],
+				'skills' : {},
+				'hpBuff'  : c[62],
+				'StrBuff' : c[63],
+				'MagBuff' : c[64],
+				'SklBuff' : c[65],
+				'SpdBuff' : c[66],
+				'LckBuff' : c[67],
+				'DefBuff' : c[68],
+				'ResBuff' : c[69],
+				'movBuff' : c[70],
+				'hitBuff'  : c[71],
+				'critBuff' : c[72],
+				'avoBuff'  : c[73],
+				'weaponRanks' : {
+					'w1' : {
+						'class' : c[40],
+						'rank'  : c[41]
+					},
+					'w2' : {
+						'class' : c[42],
+						'rank'  : c[43]
+					},
+					'w3' : {
+						'class' : c[44],
+						'rank'  : c[45]
+					}
+				}
+				};
+				
+				//sortWeapons(0,i);
+				
+				//Match weapons
+				for(var w = 34; w < 39; w++)
+					currObj.inventory["wpn_" + (w-33)] = getItem(c[w]);
+				
+				//Match skills
+				for(var s = 46; s < 54; s++)
+					currObj.skills["skl_" + (s-45)] = getSkill(c[s]);
+				
+				characters["enmy_" + i] = currObj;
+			}
+    	};
+
+		updateProgressBar();
+    };
+
     //\\//\\//\\//\\//\\//
 	// HELPER FUNCTIONS //
 	//\\//\\//\\//\\//\\//
     
 	function updateProgressBar(){
 		if(progress < 100){
-			progress = progress + 17; //6 calls
+			progress = progress + 10; //10 calls
     		$rootScope.$broadcast('loading-bar-updated', progress);
 		}
     };
@@ -270,26 +388,26 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     	
     	var found = false;
     	var w;
-    	for(w = 38; w <= 42 && !found; w++){
-    		if(char[w] == char[37])
+    	for(w = 37; w < 42 && !found; w++){
+    		if(char[36] == char[w])
     			found = true;
     	}
     	w--;
     	
-    	if(w != 38){
+    	if(w != 37){
     		char.splice(w, 1);
-    		char.splice(38, 0, char[37]);
+    		char.splice(37, 0, char[36]);
     	}
     };
     
     function findSkillInfo(skillName){
     	if(skillName.length == 0)
-    		return ["-", "-", "-"];
+    		return ["IMG/SKL/skl_blank.png", "-", "-"];
     	
     	for(var i = 0; i < skillIndex.length; i++){
     		if(skillName == skillIndex[i][1])
     			return skillIndex[i];
     	}
-    	return ["", skillName, "This skill could not be found."];
+    	return ["IMG/SKL/skl_blank.png", skillName, "This skill could not be found."];
     };
 }]);
