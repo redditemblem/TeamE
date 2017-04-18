@@ -17,9 +17,9 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
         spreadsheetId: sheetId,
         majorDimension: "ROWS",
 		valueRenderOption: "FORMULA",
-        range: 'Current Map!A1:A5',
+        range: 'Current Map!A1:A6',
       }).then(function(response) {
-    	 map = processImageURL(response.result.values[4][0]);
+    	 map = processImageURL(response.result.values[5][0]);
     	 updateProgressBar();
     	 fetchCharacterData();
       });

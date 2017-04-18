@@ -26,12 +26,28 @@ app.controller('AuthCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		'apiKey': id, 
     		'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
     	}).then(function(){
-    		authorizeDiv.style.display = 'none';
-    		loadingDiv.style.display = 'inline';
-    		DataService.loadMapData();
+			testMapActiveToggle();
     	});
     };
     
+	function testMapActiveToggle(){
+		gapi.client.sheets.spreadsheets.values.get({
+			spreadsheetId: sheetId,
+			majorDimension: "COLUMNS",
+			range: 'Current Map!A1:A1',
+		}).then(function(response) {
+			var toggle = response.result.values[0][0];
+			if(toggle == "Off"){
+				authorizeDiv.style.display = 'none';
+				unavailableDiv.style.display = 'inline';
+			}else{
+				authorizeDiv.style.display = 'none';
+				loadingDiv.style.display = 'inline';
+				DataService.loadMapData();
+			}
+		});
+	};
+
     function pickLoadingIcon(){
     	var rand = Math.floor((Math.random() * 14) + 1); //generate a number between 1 and 14
     	switch(rand){
