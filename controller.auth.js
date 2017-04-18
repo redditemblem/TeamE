@@ -7,8 +7,10 @@ app.controller('AuthCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Set div visibility
     var authorizeDiv = document.getElementById('authorize-div');
+	var unavailableDiv = document.getElementById('unavailable-div');
     var loadingDiv = document.getElementById('loading-div');
     var bar = document.getElementById('progress');
+	unavailableDiv.style.display = 'none';
     loadingDiv.style.display = 'none';
     bar.style.value = '0px';
     
