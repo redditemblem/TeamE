@@ -127,8 +127,12 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	return $scope[index + "_displayBox"] == true;
     };
     
-    $scope.isPaired = function(pairUpPartner){
-    	return false; //pairUpPartner != "";
+	$scope.isPaired = function(partner, stance){
+		return partner != "" && stance != "Attack";
+    };
+
+    $scope.isPairedFront = function(partner, stance){
+		return partner != "" && stance == "Guard";
     };
     
     //Returns the image URL for the unit in the back of a pairup
@@ -183,8 +187,8 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	else return "";
     };
     
-    $scope.validPosition = function(pos){
-    	return pos != "";
+    $scope.validPosition = function(pos, stance){
+    	return pos != "" && stance != "Backpack";
     };
     
     //Using a character's coordinates, calculates their horizontal
@@ -311,7 +315,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	if(minLvl == 0) minLvl = 1;
     	
     	if(skillName == "-" || minLvl > parseInt(charLvl))
-    		return "IMG/SKL/skl_blank.png";
+    		return "IMG/blank_skill.png";
 
     	skillName = skillName.toLowerCase();
     	skillName = skillName.replace(/ /g,"_");
@@ -339,7 +343,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Checks to see if the weapon name in the passed slot is null
     //Version for characters
     $scope.validWeapon = function(weaponName){
-    	if(weaponName != "-") return true;
+    	if(weaponName != "") return true;
     	else return false;
     };
     
@@ -394,16 +398,16 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Returns true if the weapon at the index is not an item
     $scope.notItem = function(type){
-    	return type != "Item" && type != "Forge Stone";
+    	return type != "Item" && type != "Forge Stone" && type != "Unknown";
     };
     
     $scope.setDescriptionLoc = function(type){
-    	if(type != "Item" && type != "Forge Stone") return "60px";
+    	if(type != "Item" && type != "Forge Stone" && type != "Unknown") return "60px";
     	else return "25px";
     };
 
 	$scope.setItemDescHeight = function(type){
-		if(type != "Item" && type != "Forge Stone") return "80px";
+		if(type != "Item" && type != "Forge Stone" && type != "Unknown") return "80px";
     	else return "118px";
 	};
     

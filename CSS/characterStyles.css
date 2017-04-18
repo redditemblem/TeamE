@@ -211,8 +211,8 @@
 
 .shieldsPos{
 	width:90px;
-	left:490px;
-	top:188px;
+	left:80px;
+	top:185px;
 	height:18px;
 }
 
@@ -263,4 +263,11 @@
 	height: 11px;
 	left: 1px;
 	bottom: 8px;
+}
+
+.weaknessesPos{
+	top: 195px;
+	left: 403px;
+	width: 72px;
+	height: 40px;
 }

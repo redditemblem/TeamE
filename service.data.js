@@ -76,10 +76,10 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 		  valueRenderOption: "FORMULA",
           range: 'Enemy Stats!B4:ZZ4',
         }).then(function(response) {
-      	 //var images = response.result.values[0];
+      	 var images = response.result.values[0];
       	 
       	 for(var i = 0; i < enemyData.length; i++){
-      		 enemyData[i][3] = "IMG/kitsune.gif"; //processImageURL(images[i]);
+      		 enemyData[i][3] = processImageURL(images[i]);
       	 }
       	 
       	 updateProgressBar();
@@ -133,87 +133,89 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 		characters = {};
     	for(var i = 0; i < characterData.length; i++){
     		var c = characterData[i];
-    		var currObj = {
-   			 'user'  : c[0],
-   			 'name'  : c[1],
-   			 'class' : c[2],
-   			 'unitType' : c[3],
-   			 'spriteUrl' : c[4],
-   			 'level' : c[5],
-   			 'exp'   : c[6],
-   			 'gold'  : c[7],
-   			 'position' : c[8],
-   			 'currHp': c[10],
-   			 'maxHp' : c[11],
-   			 'pStrBuff' : c[12],
-  			 'pMagBuff' : c[13],
-  			 'pSklBuff' : c[14],
-  			 'pSpdBuff' : c[15],
-  			 'pLckBuff' : c[16],
-  			 'pDefBuff' : c[17],
-  			 'pResBuff' : c[18],
-  			 'pMovBuff' : c[19],
-   			 'Str'   : c[21],
-   			 'Mag'   : c[22],
-   			 'Skl'   : c[23],
-   			 'Spd'   : c[24],
-   			 'Lck'   : c[25],
-   			 'Def'   : c[26],
-   			 'Res'   : c[27],
-   			 'mov'   : c[28],
-   			 'weaknesses' : c[29],
-   			 'atk'  : c[30],
-  			 'hit'  : c[31],
-  			 'crit' : c[32],
-  			 'avo'  : c[33],
-  			 'equippedItem' : c[36],
-   			 'inventory' : {},
-   			 'pairUpPartner' : c[43],
-   			 'stance'  : c[44],
-   			 'shields' : c[45],
-   			 'skills' : {},
-   			 'hpBuff'  : c[57],
-   			 'StrBuff' : c[58],
-   			 'MagBuff' : c[59],
-   			 'SklBuff' : c[60],
-   			 'SpdBuff' : c[61],
-   			 'LckBuff' : c[62],
-   			 'DefBuff' : c[63],
-   			 'ResBuff' : c[64],
-   			 'movBuff' : c[65],
-   			 'hitBuff'  : c[66],
-   			 'critBuff' : c[67],
-   			 'avoBuff'  : c[68],
-   			 'weaponRanks' : {
-   				 'w1' : {
-   					'class' : c[75],
-   					'rank'  : c[76],
-   					'exp'   : c[77]
-   				 },
-   				 'w2' : {
-   					'class' : c[78],
-  					'rank'  : c[79],
-  					'exp'   : c[80]
-   				 },
-   				 'w3' : {
-   					'class' : c[81],
-  					'rank'  : c[82],
-  					'exp'   : c[83]
-   				 }
-   			 }
-    		};
-    		
-    		sortWeapons(0,i);
-    		
-    		//Match weapons
-    		for(var w = 37; w < 42; w++)
-    			currObj.inventory["wpn_" + (w-36)] = getItem(c[w]);
-    		
-    		//Match skills
-    		for(var s = 48; s < 56; s++)
-    			currObj.skills["skl_" + (s-47)] = getSkill(c[s]);
-    		
-    		characters["char_" + i] = currObj;
+			if(c[1] != ""){
+				var currObj = {
+				'user'  : c[0],
+				'name'  : c[1],
+				'class' : c[2],
+				'unitType' : c[3],
+				'spriteUrl' : c[4],
+				'level' : c[5],
+				'exp'   : c[6],
+				'gold'  : c[7],
+				'position' : c[8],
+				'currHp': c[10],
+				'maxHp' : c[11],
+				'pStrBuff' : c[12],
+				'pMagBuff' : c[13],
+				'pSklBuff' : c[14],
+				'pSpdBuff' : c[15],
+				'pLckBuff' : c[16],
+				'pDefBuff' : c[17],
+				'pResBuff' : c[18],
+				'pMovBuff' : c[19],
+				'Str'   : c[21],
+				'Mag'   : c[22],
+				'Skl'   : c[23],
+				'Spd'   : c[24],
+				'Lck'   : c[25],
+				'Def'   : c[26],
+				'Res'   : c[27],
+				'mov'   : c[28],
+				'weaknesses' : c[29],
+				'atk'  : c[30],
+				'hit'  : c[31],
+				'crit' : c[32],
+				'avo'  : c[33],
+				'equippedItem' : c[36],
+				'inventory' : {},
+				'pairUpPartner' : c[43],
+				'stance'  : c[44],
+				'shields' : c[45],
+				'skills' : {},
+				'hpBuff'  : c[57],
+				'StrBuff' : c[58],
+				'MagBuff' : c[59],
+				'SklBuff' : c[60],
+				'SpdBuff' : c[61],
+				'LckBuff' : c[62],
+				'DefBuff' : c[63],
+				'ResBuff' : c[64],
+				'movBuff' : c[65],
+				'hitBuff'  : c[66],
+				'critBuff' : c[67],
+				'avoBuff'  : c[68],
+				'weaponRanks' : {
+					'w1' : {
+						'class' : c[75],
+						'rank'  : c[76],
+						'exp'   : c[77]
+					},
+					'w2' : {
+						'class' : c[78],
+						'rank'  : c[79],
+						'exp'   : c[80]
+					},
+					'w3' : {
+						'class' : c[81],
+						'rank'  : c[82],
+						'exp'   : c[83]
+					}
+				}
+				};
+				
+				sortWeapons(0,i);
+				
+				//Match weapons
+				for(var w = 37; w < 42; w++)
+					currObj.inventory["wpn_" + (w-36)] = getItem(c[w]);
+				
+				//Match skills
+				for(var s = 48; s < 56; s++)
+					currObj.skills["skl_" + (s-47)] = getSkill(c[s]);
+				
+				characters["char_" + i] = currObj;
+			}
     	};
 
 		updateProgressBar();
@@ -322,6 +324,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
 	function getItem(name){
 		var wpn = findItemInfo(name);
+		wpn[0] = name;
 		return {
 			'name' : wpn[0],
 			'class' : wpn[1],
@@ -374,12 +377,18 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     function findItemInfo(itemName){
     	if(itemName.length == 0)
     		return ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"];
-    	
+
+		if(itemName.indexOf("(") != -1){ 
+			itemName = itemName.substring(0, itemName.indexOf("(")); 
+			itemName = itemName.trim(); 
+		}
+			
     	for(var i = 0; i < itemIndex.length; i++){
     		if(itemName == itemIndex[i][0])
-    			return itemIndex[i];
+				return itemIndex[i];
     	}
-    	return ["Unknown", "-",	"-", "-", "-", "-",	"-", "-", "-", "-",	"-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "Error: This item could not be located.", "http://i.imgur.com/otiB5n4.png"];
+
+    	return [itemName, "Unknown", "", "", "", "", "", "-", "-", "-",	"-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "", "", "Error: This item could not be located.", "http://i.imgur.com/otiB5n4.png"];
     };
     
     function sortWeapons(toggle, index){
