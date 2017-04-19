@@ -60,7 +60,6 @@ img{
 	height: 2px;
 	left: 2px;
 	top: 28px;
-	background-color: red;
 }
 
 .healthBarBorder{
@@ -196,11 +195,14 @@ img{
 .italicText{ font-style: italic; }
 
 .navy{ background-color: #332F40; }
+.bloodRed{ background-color: #8e0000; }
 .paleTan{ background-color: #E5C68D; }
 .lightTan{ background-color: #e5d0aa; }
 .darkTan{ background-color: #BA7228; }
 .olive{ background-color: #490200; }
 .lightGreen{ background-color: #39af2b; }
+.red{ background-color: red; }
+.skyBlue{ background-color: #00d8ff; }
 .green{ background-color: #216619; opacity: 0.95;}
 .blackBorder{ border: 1px solid black; }
 

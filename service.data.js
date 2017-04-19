@@ -324,9 +324,8 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
 	function getItem(name){
 		var wpn = findItemInfo(name);
-		wpn[0] = name;
 		return {
-			'name' : wpn[0],
+			'name' : name,
 			'class' : wpn[1],
 			'atkStat' : wpn[2],
 			'rank' : wpn[3],
@@ -411,12 +410,12 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
     function findSkillInfo(skillName){
     	if(skillName.length == 0)
-    		return ["IMG/SKL/skl_blank.png", "-", "-"];
+    		return ["IMG/skl_blank.png", "-", "-"];
     	
     	for(var i = 0; i < skillIndex.length; i++){
     		if(skillName == skillIndex[i][1])
     			return skillIndex[i];
     	}
-    	return ["IMG/SKL/skl_blank.png", skillName, "This skill could not be found."];
+    	return ["IMG/skl_blank.png", skillName, "This skill could not be found."];
     };
 }]);

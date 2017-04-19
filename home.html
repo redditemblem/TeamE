@@ -19,7 +19,7 @@
 				<div ng-if="!isNotEnemy(cIndex)" class="enemyNum">{{getEnemyNum(char.name)}}</div>
 			</div>
 			<div class="healthBarBack"></div>
-			<div class="healthBarFront" ng-style="{width:((char.currHp/char.maxHp)*28)+'px'}"></div>
+			<div class="healthBarFront" ng-class="isChar(cIndex) ? 'skyBlue' : 'red'" ng-style="{width:((char.currHp/char.maxHp)*28)+'px'}"></div>
 			<div class="healthBarBorder"></div>
 			<div ng-if="isPairedFront(char.pairUpPartner, char.stance)" class="pairUpIcon"><img src="IMG/shield_pairup.png"></div>
 		</div>
@@ -39,7 +39,7 @@
 			</div>
 		</div>
 		<!--Name-->
-		<div class="infoElement navy whiteText enemyNamePos" style="text-align: center">
+		<div class="infoElement whiteText enemyNamePos" ng-class="isChar(cIndex) ? 'navy' : 'bloodRed'" style="text-align: center">
 			{{char.name}}
 		</div>
 		<!--Class-->
@@ -94,11 +94,11 @@
 		</div>
 		<!--Character Weaknesses-->
 		<div class="infoElement paleTan weaknessesPos" title="Unit Weaknesses">
-			<img ng-if="weaponEffective(char.weaknesses,'armor')" src="IMG/eff_armor.png">
-			<img ng-if="weaponEffective(char.weaknesses,'flying')" src="IMG/eff_flying.png">
-			<img ng-if="weaponEffective(char.weaknesses,'beast')" src="IMG/eff_beast.png">
-			<img ng-if="weaponEffective(char.weaknesses,'dragon')" src="IMG/eff_dragon.png">
-			<img ng-if="weaponEffective(char.weaknesses,'golem')" src="IMG/eff_monster.png">
+			<img ng-if="weaponEffective(char.weaknesses,'armor')" src="IMG/eff_armor.png" title="Armor">
+			<img ng-if="weaponEffective(char.weaknesses,'flying')" src="IMG/eff_flying.png" title="Flying">
+			<img ng-if="weaponEffective(char.weaknesses,'beast')" src="IMG/eff_beast.png" title="Beast">
+			<img ng-if="weaponEffective(char.weaknesses,'dragon')" src="IMG/eff_dragon.png" title="Dragon">
+			<img ng-if="weaponEffective(char.weaknesses,'golem')" src="IMG/eff_monster.png" title="Golem">
 		</div>
 		<!--Shields-->
 		<div class="infoElement shieldsPos" title="Dual Guard Shields">

@@ -126,6 +126,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     $scope.checkCharToggle = function(index){
     	return $scope[index + "_displayBox"] == true;
     };
+
+	$scope.isChar = function(objName){
+		return objName.indexOf("char_") != -1;
+	};
     
 	$scope.isPaired = function(partner, stance){
 		return partner != "" && stance != "Attack";
