@@ -193,6 +193,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
 
 	$scope.isBoss = function(unitType){ unitType = unitType.toLowerCase(); return unitType.indexOf('boss') != -1; };
 	$scope.canTalk = function(unitType){ unitType = unitType.toLowerCase(); return unitType.indexOf('talk') != -1; };
+
+	$scope.textTooLong = function(textA, textB){
+		return (textA.length + textB.length) > 150;
+	};
     
     $scope.validPosition = function(pos, stance){
     	return pos != "" && stance != "Backpack";

@@ -214,6 +214,10 @@ img{
 .green{ background-color: #216619; opacity: 0.95;}
 .blackBorder{ border: 1px solid black; }
 
+p{
+	display: inline;
+}
+
 .scroll-up {	
  overflow: hidden;
  position: relative;
