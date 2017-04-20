@@ -12,14 +12,22 @@ img{
   -ms-interpolation-mode: nearest-neighbor;
 }
 
-.mapBox{
-	position:absolute;
+.backgroundBox{
+	position:fixed;
 	top:0px;
 	left:0px;
 	height:100%;
 	width:100%;
 	background-image: url("../IMG/background.png");
     background-repeat: repeat;
+}
+
+.mapBox{
+	position:absolute;
+	top:0px;
+	left:0px;
+	height:100%;
+	width:100%;
 }
 
 .charDiv{
