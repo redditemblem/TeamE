@@ -22,6 +22,8 @@
 			<div class="healthBarFront" ng-class="isChar(cIndex) ? 'skyBlue' : 'red'" ng-style="{width:((char.currHp/char.maxHp)*28)+'px'}"></div>
 			<div class="healthBarBorder"></div>
 			<div ng-if="isPairedFront(char.pairUpPartner, char.stance)" class="pairUpIcon"><img src="IMG/shield_pairup.png"></div>
+			<div ng-if="isBoss(char.unitType)" class="pairUpIcon"><img src="IMG/shield_boss.png"></div>
+			<div ng-if="canTalk(char.UnitType)" class="enemyTalkBalloon"><img src="IMG/talk.gif"></div>
 		</div>
 	</div>
 	

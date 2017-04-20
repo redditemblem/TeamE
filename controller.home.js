@@ -190,6 +190,9 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	if(name.match(/^[0-9]+$/) != null) return "IMG/NUM/" + name + ".png";
     	else return "";
     };
+
+	$scope.isBoss = function(unitType){ unitType = unitType.toLowerCase(); return unitType.indexOf('boss') != -1; };
+	$scope.canTalk = function(unitType){ unitType = unitType.toLowerCase(); return unitType.indexOf('talk') != -1; };
     
     $scope.validPosition = function(pos, stance){
     	return pos != "" && stance != "Backpack";
