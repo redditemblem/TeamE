@@ -72,12 +72,8 @@
 	position: absolute;
 	width: 9px;
 	height: 16px;
-	right: 2px;
-	bottom: 0px;
-	text-align: right;
-	font-weight: bold;
-	font-size: 10px;
-	color: white;
+	right: 8px;
+	bottom: 5px;
 }
 
 .enemyTalkBalloon{

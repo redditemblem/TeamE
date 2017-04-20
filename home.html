@@ -16,7 +16,7 @@
 			<!--Unit sprite-->
 			<div class="charDiv" ng-class="isPairedFront(char.pairUpPartner, char.stance) ? 'mapCharOffsetRight' : 'mapCharOffsetNone'">
 				<img ng-src="{{char.spriteUrl}}" class="mapCharCentered">
-				<div ng-if="!isNotEnemy(cIndex)" class="enemyNum">{{getEnemyNum(char.name)}}</div>
+				<div ng-if="!isNotEnemy(cIndex)" class="enemyNum"><img src="{{getEnemyNum(char.name)}}"/></div>
 			</div>
 			<div class="healthBarBack"></div>
 			<div class="healthBarFront" ng-class="isChar(cIndex) ? 'skyBlue' : 'red'" ng-style="{width:((char.currHp/char.maxHp)*28)+'px'}"></div>

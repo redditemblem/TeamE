@@ -187,7 +187,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		return "";
     	name = name.substring(name.lastIndexOf(" ")+1, name.length);
     	
-    	if(name.match(/^[0-9]+$/) != null) return name;
+    	if(name.match(/^[0-9]+$/) != null) return "IMG/NUM/" + name + ".png";
     	else return "";
     };
     
