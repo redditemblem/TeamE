@@ -208,7 +208,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				
 				//Match weapons
 				for(var w = 37; w < 42; w++)
-					currObj.inventory["wpn_" + (w-36)] = getItem(c[w]);
+					currObj.inventory["wpn_" + (w-36)] = getItem(c[w], (w-36), c[36]);
 				
 				//Match skills
 				for(var s = 48; s < 56; s++)
@@ -290,11 +290,11 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				}
 				};
 				
-				//sortWeapons(0,i);
+				sortWeapons(1,i);
 				
 				//Match weapons
 				for(var w = 34; w < 39; w++)
-					currObj.inventory["wpn_" + (w-33)] = getItem(c[w]);
+					currObj.inventory["wpn_" + (w-33)] = getItem(c[w], (w-33), c[33]);
 				
 				//Match skills
 				for(var s = 46; s < 54; s++)
@@ -322,8 +322,9 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     	return str.substring(8, str.length-4);
     };
     
-	function getItem(name){
+	function getItem(name, num, equipped){
 		var wpn = findItemInfo(name);
+		if(num == 1 && name == equipped){ name += " (E)"; }
 		return {
 			'name' : name,
 			'class' : wpn[1],
@@ -393,18 +394,22 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     function sortWeapons(toggle, index){
     	var char;
     	if(toggle == 0) char = characterData[index];
+		else char = enemyData[index];
     	
     	var found = false;
-    	var w;
-    	for(w = 37; w < 42 && !found; w++){
-    		if(char[36] == char[w])
+    	var w, e, s;
+		if(toggle == 0){ s = 36; w = 37; e = 42; }
+		else{ s= 33; w = 34; e = 39; }
+
+    	for(w; w < e && !found; w++){
+    		if(char[s] == char[w])
     			found = true;
     	}
     	w--;
     	
-    	if(w != 37){
+    	if(w != (s+1)){
     		char.splice(w, 1);
-    		char.splice(37, 0, char[36]);
+    		char.splice((s+1), 0, char[s]);
     	}
     };
     

@@ -111,7 +111,7 @@
 			</div>
 		</div>
 		<!--Inventory-->
-		<div ng-repeat="weapon in char.inventory" ng-mouseenter="weaponHoverIn(cIndex, $index)" ng-mouseleave="weaponHoverOut(cIndex, $index)" class="infoElement redText hoverTan itemsPos" ng-class="$index == 0 ? 'lightTan' : 'paleTan'" ng-style="{top: fetchEWeaponVerticalPos($index)}">
+		<div ng-repeat="weapon in char.inventory" ng-mouseenter="weaponHoverIn(cIndex, $index)" ng-mouseleave="weaponHoverOut(cIndex, $index)" class="infoElement redText hoverTan itemsPos paleTan" ng-style="{top: fetchEWeaponVerticalPos($index)}">
 			<span class="indentedWeaponIcon" ng-if="validWeapon(weapon.name)"><img ng-src="{{weapon.spriteUrl}}" style="height:16px; width:16px;"/></span>
 			<span class="indentedWeaponName" ng-if="validWeapon(weapon.name)">{{weapon.name}}</span>
 			<div class="weaponEffectIcons">
