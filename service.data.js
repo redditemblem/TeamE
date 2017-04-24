@@ -375,7 +375,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 	//\\//\\//\\//\\//\\//
 
     function findItemInfo(itemName){
-    	if(itemName.length == 0)
+    	if(itemName == undefined || itemName.length == 0)
     		return ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"];
 
 		if(itemName.indexOf("(") != -1){ 
@@ -414,7 +414,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     };
     
     function findSkillInfo(skillName){
-    	if(skillName.length == 0)
+    	if(skillName == undefined || skillName.length == 0)
     		return ["IMG/skl_blank.png", "-", "-"];
     	
     	for(var i = 0; i < skillIndex.length; i++){
