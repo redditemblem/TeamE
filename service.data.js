@@ -47,7 +47,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
         }).then(function(response) {
       	 var images = response.result.values[0];
       	 
-      	 for(var i = 0; i < images.length; i++){
+      	 for(var i = 0; i < images.length && i < characterData.length; i++){
       		 characterData[i][4] = processImageURL(images[i]);
       	 }
       	 
@@ -78,7 +78,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
         }).then(function(response) {
       	 var images = response.result.values[0];
       	 
-      	 for(var i = 0; i < enemyData.length; i++){
+      	 for(var i = 0; i < images.length && i < enemyData.length; i++){
       		 enemyData[i][3] = processImageURL(images[i]);
       	 }
       	 
@@ -121,7 +121,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
           }).then(function(response) {
             var images = response.result.values[0];
             
-            for(var i = 0; i < skillIndex.length; i++)
+            for(var i = 0; i < images.length && i < skillIndex.length; i++)
             	skillIndex[i][0] = processImageURL(images[i]);
             	
             updateProgressBar();
