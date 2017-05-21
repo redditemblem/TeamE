@@ -210,7 +210,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     $scope.determineCharX = function(pos){
 		pos = pos.match(/[-+][0-9]+/g)[0];
 		var c = parseInt(pos.substring(1));
-		if(pos.charAt(0) == "-") c += 32; //if coordinate if from the right side, add 32 to the column count
+		if(pos.charAt(0) == "-") c = 32 + (32 - c); //Flip if rightsided coordinate
 		return (c * (boxWidth + gridWidth)) + "px";
     };
 
