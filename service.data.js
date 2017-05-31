@@ -188,19 +188,19 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				'avoBuff'  : c[68],
 				'weaponRanks' : {
 					'w1' : {
-						'class' : c[75],
-						'rank'  : c[76],
-						'exp'   : c[77]
+						'class' : c[84],
+						'rank'  : c[85],
+						'exp'   : c[86]
 					},
 					'w2' : {
-						'class' : c[78],
-						'rank'  : c[79],
-						'exp'   : c[80]
+						'class' : c[87],
+						'rank'  : c[88],
+						'exp'   : c[89]
 					},
 					'w3' : {
-						'class' : c[81],
-						'rank'  : c[82],
-						'exp'   : c[83]
+						'class' : c[90],
+						'rank'  : c[91],
+						'exp'   : c[92]
 					}
 				}
 				};
