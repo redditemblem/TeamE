@@ -124,8 +124,10 @@
 .currHPText{
 	font-size:30px;
 	position: absolute;
-	left:50px;
-	top:5px;
+	left:40px;
+	top:4px;
+	width: 55px;
+	text-align: right;
 }
 
 .totalHPText{
