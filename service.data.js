@@ -131,7 +131,6 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
     function processCharacters(){
 		characters = {};
-		var count = 0;
     	for(var i = 0; i < characterData.length; i++){
     		var c = characterData[i];
 			if(c[1] != ""){
@@ -215,14 +214,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				for(var s = 48; s < 56; s++)
 					currObj.skills["skl_" + (s-47)] = getSkill(c[s]);
 				
-				characters["char_" + count] = currObj;
-				count++;
-
-				//Make mirrored character
-				var dupObj = JSON.parse(JSON.stringify(currObj));
-				dupObj.position = dupObj.position.replace("+", "-");
-				characters["char_" + count] = dupObj;
-				count++;
+				characters["char_" + i] = currObj;
 			}
     	};
 

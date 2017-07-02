@@ -83,12 +83,9 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
         	width = width / (boxWidth + gridWidth);
         	var temp = [];
         	
-			var sub = 1;
-        	for(var i = 0; i < width; i++){
-				if(i < 32) temp.push(i+1);
-				else{ temp.push(i - sub); sub+=2; }
-			}
-        	
+			for(var i = 0; i < width; i++)
+                temp.push(i+1);
+
         	if(temp.length != 0){
         		$interval.cancel(colTimer); //cancel $interval timer
         		$scope.columns = temp;
@@ -208,10 +205,9 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Using a character's coordinates, calculates their horizontal
     //position on the map
     $scope.determineCharX = function(pos){
-		pos = pos.match(/[-+][0-9]+/g)[0];
-		var c = parseInt(pos.substring(1));
-		if(pos.charAt(0) == "-") c = 32 + (32 - c); //Flip if rightsided coordinate
-		return (c * (boxWidth + gridWidth)) + "px";
+        pos = pos.match(/[0-9]+/g)[0];
+        pos = parseInt(pos);
+        return (pos * (boxWidth + gridWidth)) + "px";
     };
 
     //Using a character's coordinates, calculates their vertical
