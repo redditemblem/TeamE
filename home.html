@@ -20,7 +20,7 @@
 				<div ng-if="!isNotEnemy(cIndex)" class="enemyNum"><img src="{{getEnemyNum(char.name)}}"/></div>
 			</div>
 			<div class="healthBarBack"></div>
-			<div class="healthBarFront" ng-class="isChar(cIndex) ? 'skyBlue' : 'red'" ng-style="{width:((char.currHp/char.maxHp)*28)+'px'}"></div>
+			<div class="healthBarFront" ng-class="getHealthBarColor(cIndex, char.currHp, char.maxHp)" ng-style="{width: calcHpBarPercent(char.currHp, char.maxHp)}"></div>
 			<div class="healthBarBorder"></div>
 			<!--Unit icons-->
 			<div ng-if="isPairedFront(char.pairUpPartner, char.stance)" class="pairUpIcon"><img src="IMG/shield_pairup.png"></div>

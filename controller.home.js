@@ -201,6 +201,20 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     $scope.validPosition = function(pos, stance){
     	return pos != "" && stance != "Backpack";
     };
+
+	$scope.getHealthBarColor = function(cIndex, currHp, maxHp){
+		currHp = parseInt(currHp);
+		maxHp = parseInt(maxHp);
+		if(currHp > maxHp) return 'purple';
+		else if(cIndex.indexOf("char_") != -1) return 'skyBlue';
+		else return 'red';
+	};
+
+	$scope.calcHpBarPercent = function(currHp, maxHp){
+		currHp = parseInt(currHp);
+		maxHp = parseInt(maxHp);
+		return ((Math.min(currHp, maxHp)/maxHp)*28)+'px'
+	}
     
     //Using a character's coordinates, calculates their horizontal
     //position on the map
