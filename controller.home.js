@@ -136,7 +136,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     };
 
     $scope.isPairedFront = function(partner, stance){
-		return partner != "" && stance == "Guard";
+		return partner != "" && (stance == "Guard" || stance == "Bold");
     };
     
     //Returns the image URL for the unit in the back of a pairup
@@ -276,6 +276,11 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     // PROCESSING/FORMATTING \\
     //***********************\\
     
+	$scope.getCharNameFontSize = function(name){
+		if(name.length <= 16) return "22px";
+		else return Math.max(10, (22 - Math.ceil((name.length - 16)/1.5))) + "px";
+	};
+
     //Returns true if the value in the passed attribute is >= 0
     $scope.checkRate = function(stat){ return parseInt(stat) >= 0; };
     
@@ -397,6 +402,11 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	return "IMG/rank_" + c + ".png";
     };
     
+	$scope.getWeaponNameFontSize = function(name){
+		if(name.length <= 21) return "14px";
+		else return Math.max(8, (14 - Math.floor((name.length - 21)/2))) + "px";
+	};
+
     //Calculates the percentage of weapon proficicency for a specific weapon,
     //then returns the width of the progress bar in pixels
     $scope.calcWeaponExp = function(exp){

@@ -73,13 +73,13 @@
 .indentedWeaponName{
 	position: absolute;
 	left:31px;
-	top:4px;
+	vertical-align: middle;
 }
 
 .indentedWeaponIcon{
 	position: absolute;
 	left:10px;
-	top:6px;
+	top:4px;
 	height:16px;
 	width:16px;
 	display:inline-block;
@@ -242,6 +242,7 @@
 	width:231px;
 	left:5px;
 	height:25px;
+	line-height: 25px;
 }
 
 .itemInfoPos{
