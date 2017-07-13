@@ -2,11 +2,13 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 	var sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
 	var progress = 0;
 	var characters = null;
-	var map, characterData, enemyData, itemIndex, skillIndex;
+	var map, characterData, enemyData, itemIndex, skillIndex, classIndex, terrainIndex, terrainLocs;
 	
 	this.getCharacters = function(){ return characters; };
 	this.getMap = function(){ return map; };
 	this.loadMapData = function(){ fetchMapUrl(); };
+	this.getTerrainTypes = function(){ return terrainIndex; };
+	this.getTerrainMappings = function(){ return terrainLocs; };
 	
 	//\\//\\//\\//\\//\\//
 	// DATA AJAX CALLS  //
@@ -125,9 +127,66 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
             	skillIndex[i][0] = processImageURL(images[i]);
             	
             updateProgressBar();
-            processCharacters();
+            fetchClassIndex();
           });
-    };
+	};
+	
+	function fetchClassIndex(){
+    	gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            majorDimension: "ROWS",
+            range: 'Class Info!A2:AQ',
+          }).then(function(response) {
+            classIndex = response.result.values;
+            
+            updateProgressBar();
+            fetchTerrainIndex();
+          });
+	};
+
+	function fetchTerrainIndex(){
+		gapi.client.sheets.spreadsheets.values.get({
+			spreadsheetId: sheetId,
+			majorDimension: "ROWS",
+			range: 'Terrain List!A2:L',
+		}).then(function(response) {
+			var rows = response.result.values;
+			terrainIndex = {};
+
+			for(var i = 0; i < rows.length; i++){
+				var r = rows[i];
+				terrainIndex[r[0]] = {
+					'avo' : r[1] != "-" ? parseInt(r[1]) : 0,
+					'def' : r[2] != "-" ? parseInt(r[2]) : 0,
+					'heal' : r[3] != "-" ? parseInt(r[3]) : 0,
+					'Foot' :  r[4],
+					'Beast' : r[5],
+					'Mage' : r[6],
+					'Mount (T1)' :  r[7],
+					'Mount (T2)' :  r[8],
+					'Flier' : r[9],
+					'attack' : r[10],
+					'desc' : r[11]
+				}
+			}
+
+			updateProgressBar();
+			fetchTerrainChart();
+		});
+	};
+
+	function fetchTerrainChart(){
+	    gapi.client.sheets.spreadsheets.values.get({
+			spreadsheetId: sheetId,
+			majorDimension: "ROWS",
+			range: 'Terrain Coordinates!A:ZZ',
+	    }).then(function(response) {
+			terrainLocs = response.result.values;
+
+			updateProgressBar();
+			processCharacters();
+		});
+	};
     
     function processCharacters(){
 		characters = {};
@@ -137,7 +196,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				var currObj = {
 				'user'  : c[0],
 				'name'  : c[1],
-				'class' : c[2],
+				'class' : getClass(c[2]),
 				'unitType' : c[3],
 				'spriteUrl' : c[4],
 				'level' : c[5],
@@ -228,7 +287,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 			if(c[0] != ""){
 				var currObj = {
 				'name'  : c[0],
-				'class' : c[1],
+				'class' : getClass(c[1]),
 				'unitType' : c[2],
 				'spriteUrl' : c[3],
 				'currHp': c[5],
@@ -313,7 +372,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
 	function updateProgressBar(){
 		if(progress < 100){
-			progress = progress + 10; //10 calls
+			progress = progress + 7.8; //12 calls
     		$rootScope.$broadcast('loading-bar-updated', progress);
 		}
     };
@@ -370,6 +429,14 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 		};
 	};
 
+	function getClass(name){
+		var c = findClassInfo(name);
+		return{
+			'name' : c[0],
+			'movType' : c[1]
+		}
+	};
+
 	//\\//\\//\\//\\//\\//
 	// SEARCH FUNCTIONS //
 	//\\//\\//\\//\\//\\//
@@ -422,5 +489,16 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     			return skillIndex[i];
     	}
     	return ["IMG/skl_blank.png", skillName, "This skill could not be found."];
-    };
+	};
+	
+	function findClassInfo(name){
+		if(name == undefined || name.length == 0)
+    		return ["-", "Foot"];
+    	
+    	for(var i = 0; i < classIndex.length; i++){
+    		if(name == classIndex[i][0])
+    			return [classIndex[i][0], classIndex[i][42]];
+    	}
+    	return [name + "(M)", "Foot"];
+	};
 }]);

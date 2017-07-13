@@ -1,8 +1,9 @@
 app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', function ($scope, $location, $interval, DataService) {
 	const rowNames = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "MM", "NN", "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "VV", "WW", "XX", "YY", "ZZ"];
-	var onLoad = checkData();
 	$scope.rows = ["A"];
-    $scope.columns = ["1"];
+	$scope.columns = ["1"];
+	var coordMapping;
+
 	$scope.statsList = [
 	                ["Str", "Strength. Affects damage the unit deals with physical attacks.", "5px", "5px"],
 	                ["Mag", "Magic. Affects damage the unit deals with magical attacks.", "29px", "14px"],
@@ -33,14 +34,14 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     
     //Reroutes the user if they haven't logged into the app
     //Loads data from the DataService if they have
-    function checkData(){
-    	if(DataService.getCharacters() == null)
-    		$location.path('/');
-    	else{
-    		$scope.charaData = DataService.getCharacters();
-			$scope.mapUrl = DataService.getMap();
-    	}
-    };
+	if(DataService.getCharacters() == null)
+		$location.path('/');
+	else{
+		$scope.charaData = DataService.getCharacters();
+		$scope.mapUrl = DataService.getMap();
+		$scope.terrainTypes = DataService.getTerrainTypes();
+		coordMapping = DataService.getTerrainMappings();
+	}
     
     //*************************\\
     // FUNCTIONS FOR MAP TILE  \\
@@ -64,8 +65,12 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
         	var temp = rowNames.slice(0, height);
         	
         	if(temp.length != 0){
-        		$interval.cancel(rowTimer); //cancel $interval timer
-        		$scope.rows = temp;
+				$interval.cancel(rowTimer); //cancel $interval timer
+				rowTimer = null;
+				$scope.rows = temp;
+				
+				if(rowTimer == null && colTimer == null)
+					initializeTerrain();
         	}
     	}
     };
@@ -87,8 +92,12 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
                 temp.push(i+1);
 
         	if(temp.length != 0){
-        		$interval.cancel(colTimer); //cancel $interval timer
-        		$scope.columns = temp;
+				$interval.cancel(colTimer); //cancel $interval timer
+				colTimer = null;
+				$scope.columns = temp;
+				
+				if(rowTimer == null && colTimer == null)
+					initializeTerrain();
         	}
     	}
     };
@@ -101,7 +110,16 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     //Returns the horizontal position of a glowBox element
     $scope.determineGlowX = function(index){
     	return (index * (boxWidth + gridWidth)) + "px";
-    };
+	};
+	
+	$scope.determineGlowColor = function(loc){
+		if($scope.terrainLocs == undefined) return '';
+		var terrainInfo = $scope.terrainLocs[loc];
+		if(terrainInfo.movCount > 0) return 'blue';
+		if(terrainInfo.atkCount > 0) return 'red';
+		if(terrainInfo.healCount > 0) return 'green';
+		return '';
+	};
     
     //*************************\\
     // FUNCTIONS FOR MAP       \\
@@ -113,19 +131,36 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	var bool = $scope[char + "_displayBox"];
     	if(bool == undefined || bool == false){
     		positionCharBox(char);
+			toggleCharRange(char, 1);
     		$scope[char + "_displayBox"] = true;
     	}else{
+			toggleCharRange(char, -1);
     		$scope[char + "_displayBox"] = false;
     	}
     };
-    
-    $scope.removeData = function(index){
-    	$scope[index + "_displayBox"] = false;
+
+    $scope.removeData = function(char){
+		toggleCharRange(char, -1);
+    	$scope[char + "_displayBox"] = false;
     };
     
-    $scope.checkCharToggle = function(index){
-    	return $scope[index + "_displayBox"] == true;
+    $scope.checkCharToggle = function(char){
+    	return $scope[char + "_displayBox"] == true;
     };
+
+	//Add/remove character's range highlighted cells
+	function toggleCharRange(char, val){
+		var movRangeList = $scope.charaData[char].range;
+		var atkRangeList = $scope.charaData[char].atkRange;
+		var healRangeList = $scope.charaData[char].healRange;
+
+		for(var i = 0; i < movRangeList.length; i++)
+			$scope.terrainLocs[movRangeList[i]].movCount += val;
+		for(var j = 0; j < atkRangeList.length; j++)
+			$scope.terrainLocs[atkRangeList[j]].atkCount += val;
+		for(var k = 0; k < healRangeList.length; k++)
+			$scope.terrainLocs[healRangeList[k]].healCount += val;
+	};
 
 	$scope.isChar = function(objName){
 		return objName.indexOf("char_") != -1;
@@ -515,5 +550,164 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	    
     	    $interval.cancel(dragNDrop); //cancel $interval timer
     	}
-    };
+	};
+	
+		
+	//******************\\
+	// CHARACTER RANGES \\
+	//******************\\
+
+	function initializeTerrain(){
+		$scope.terrainLocs = {};
+
+		for(var y = 0; y < $scope.columns.length; y++)
+				for(var x = 0; x < $scope.rows.length; x++)
+					$scope.terrainLocs[$scope.rows[x]+$scope.columns[y]] = getDefaultTerrainObj();
+			
+		//Update terrain types from input list
+		for(var r = 0; r < coordMapping.length; r++){
+			var row = coordMapping[r];
+			for(var c = 0; c < row.length; c++){
+				$scope.terrainLocs[$scope.rows[r]+$scope.columns[c]].type = row[c];
+			}
+		}
+
+		for(var c in $scope.charaData)
+			if($scope.terrainLocs[$scope.charaData[c].position] != undefined)
+				$scope.terrainLocs[$scope.charaData[c].position].occupiedAffiliation = c.indexOf("char_") > -1 ? "char" : "enemy";
+
+		calculateCharacterRanges();
+	};
+
+	function getDefaultTerrainObj(){
+		return {
+			'type' : "Plain",
+			'movCount' : 0,
+			'atkCount' : 0,
+			'healCount' : 0,
+			'occupiedAffiliation' : ''
+		}
+	};
+
+	function calculateCharacterRanges(){
+		for(var c in $scope.charaData){
+			var char = $scope.charaData[c];
+			var list = [];
+			var atkList = [];
+			var healList = [];
+			
+			if(char.position.length > 0){
+				var horz = $scope.rows.indexOf(char.position.match(/[a-zA-Z]+/g)[0]);
+				var vert = $scope.columns.indexOf(parseInt(char.position.match(/[0-9]+/g)[0]));
+				var range = parseInt(char.mov);
+
+				var maxAtkRange = 0;
+				var maxHealRange = 0;
+
+				for(var i in char.inventory){
+					var item = char.inventory[i];
+					var r = formatItemRange(item.range);
+					if(isAttackingItem(item.class) && r > maxAtkRange) maxAtkRange = r;
+					else if(r > maxHealRange) maxHealRange = r;
+				}
+
+				//Deal with Bifrost
+				if(maxHealRange > 7) maxHealRange = 0;
+				//if(maxHealRange > $scope.rows.length && maxHealRange > $scope.columns.length) maxHealRange = 0;
+
+				var affliliation = c.indexOf("char_") > -1 ? "char" : "enemy";
+
+				recurseRange(horz, vert, 5, maxAtkRange, maxHealRange, char.class.movType, affliliation, list, atkList, healList, "_");
+				char.range = list;
+				char.atkRange = atkList;
+				char.healRange = healList;
+			}else{			
+				char.range = [];
+				char.atkRange = [];
+				char.healRange = [];
+			}
+		}
+	};
+
+	function recurseRange(horzPos, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace){
+		var coord = $scope.rows[horzPos] + $scope.columns[vertPos];
+		
+		//Don't calculate cost for starting tile
+		if(trace.length > 1){
+			var cost = 1;
+
+			var occupiedAff = $scope.terrainLocs[coord].occupiedAffiliation;
+			var classCost = $scope.terrainTypes[$scope.terrainLocs[coord].type][terrainType];
+
+			//Unit cannot traverse tile if it has no cost or it is occupied by an enemy unit
+			if(   classCost == undefined
+			   || classCost == "-"
+			   || (occupiedAff.length > 0 && occupiedAff != affiliation)
+			){
+				recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", true);
+				recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", true);
+				return;
+			}
+			else cost = parseFloat(classCost);
+			
+			range -= cost;
+		}
+		
+		if(list.indexOf(coord) == -1) list.push(coord);
+		trace += coord + "_";
+
+		if(range <= 0){ //base case
+			recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", false);
+			recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", false);
+			return;
+		} 
+
+		if(horzPos > 0 && trace.indexOf("_" + $scope.rows[horzPos-1] + $scope.columns[vertPos] + "_") == -1)
+			recurseRange(horzPos-1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+		if(horzPos < $scope.rows.length-1 && trace.indexOf("_" + $scope.rows[horzPos+1] + $scope.columns[vertPos] + "_") == -1)
+			recurseRange(horzPos+1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+
+		if(vertPos > 0 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos-1] + "_") == -1)
+			recurseRange(horzPos, vertPos-1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+		if(vertPos < $scope.columns.length-1 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos+1] + "_") == -1)
+			recurseRange(horzPos, vertPos+1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+	};
+
+	function recurseItemRange(horzPos, vertPos, range, list, itemList, trace, countSelf){
+		if(range <= 0) return; //base case
+		var coord = $scope.rows[horzPos] + $scope.columns[vertPos];
+
+		if(countSelf || trace.length > 1){
+			//Make sure tile can be traversed by some unit
+			var classCost = $scope.terrainTypes[$scope.terrainLocs[coord].type].attack;
+			if(classCost == undefined || classCost == "-") return;
+			range -= parseFloat(classCost);
+
+			if(list.indexOf(coord) == -1 && itemList.indexOf(coord) == -1) 
+				itemList.push(coord);
+		}
+
+		trace += coord + "_";
+
+		if(horzPos > 0 && trace.indexOf("_" + $scope.rows[horzPos-1] + $scope.columns[vertPos] + "_") == -1)
+			recurseItemRange(horzPos-1, vertPos, range, list, itemList, trace, countSelf);
+		if(horzPos < $scope.rows.length-1 && trace.indexOf("_" + $scope.rows[horzPos+1] + $scope.columns[vertPos] + "_") == -1)
+			recurseItemRange(horzPos+1, vertPos, range, list, itemList, trace, countSelf);
+		
+		if(vertPos > 0 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos-1] + "_") == -1)
+			recurseItemRange(horzPos, vertPos-1, range, list, itemList, trace, countSelf);
+		if(vertPos < $scope.columns.length-1 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos+1] + "_") == -1)
+			recurseItemRange(horzPos, vertPos+1, range, list, itemList, trace, countSelf);
+	};
+
+	function formatItemRange(range){
+		if(range.indexOf("~") != -1 && range.length > 1)
+			range = range.substring(range.indexOf("~")+1, range.length);
+		range = range.trim();
+		return range.match(/^[0-9]+$/) != null ? parseInt(range) : 0;
+	};
+
+	function isAttackingItem(wpnClass){
+		return wpnClass != "Staff";
+	};
 }]);

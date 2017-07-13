@@ -3,13 +3,24 @@
 	<img id="map" class="absolutePos" src="{{mapUrl}}">
 	
 	<!--Draw tile names-->
-	<div ng-repeat="(yIndex,row) in rows" class="glowBoxIndent absolutePos" ng-style="{top: determineGlowY(yIndex)}">
-		<div class="glowBox" ng-repeat="(indexX,column) in columns" title="{{row}}{{column}}" ng-style="{left: determineGlowX(indexX)}"></div>
+	<div style="margin-top:2px">
+		<div ng-repeat="(yIndex,row) in rows" class="glowBoxIndent absolutePos" ng-style="{top: determineGlowY(yIndex)}">
+			<div class="glowBox"
+				ng-repeat="(indexX,column) in columns"
+				title="({{row}}{{column}}) {{terrainLocs[row+column].type}}: {{terrainTypes[terrainLocs[row+column].type].avo}}🚶  {{terrainTypes[terrainLocs[row+column].type].def}}⛨  {{terrainTypes[terrainLocs[row+column].type].heal}}♥"
+				ng-style="{left: determineGlowX(indexX), 'background-color': determineGlowColor(row+column)}"></div>
+		</div>
 	</div>
 	
 	<!--Draw characters-->
 	<div ng-repeat="(cIndex,char) in charaData">
-		<div id="{{cIndex}}" ng-if="validPosition(char.position, char.stance)" ng-click="displayData(cIndex)" class="absolutePos charDiv hoverImage" title="{{char.position}}" ng-style="{top: determineCharY(char.position), left: determineCharX(char.position)}">
+		<div id="{{cIndex}}"
+			 ng-if="validPosition(char.position, char.stance)"
+			 ng-click="displayData(cIndex)"
+			 class="absolutePos charDiv hoverImage"
+			 title="({{char.position}}) {{terrainLocs[char.position].type}}: {{terrainTypes[terrainLocs[char.position].type].avo}}🚶  {{terrainTypes[terrainLocs[char.position].type].def}}⛨  {{terrainTypes[terrainLocs[char.position].type].heal}}♥"
+			 ng-style="{top: determineCharY(char.position), left: determineCharX(char.position)}"
+		>
 			<!--Paired unit sprite-->
 			<div ng-if="isPairedFront(char.pairUpPartner, char.stance)" class="charDiv mapCharOffsetLeft">
 				<img ng-src="{{getPairUnitIcon(char.pairUpPartner)}}" class="mapCharCentered dimImage">
@@ -48,7 +59,7 @@
 		</div>
 		<!--Class-->
 		<div class="infoElement paleTan redText enemyClassPos">
-			<span style="float: left;">{{char.class}}</span>
+			<span style="float: left;">{{char.class.name}}</span>
 			<span style="float: right;">Lvl. {{char.level}}</span>
 		</div>
 		<!--Current EXP-->
