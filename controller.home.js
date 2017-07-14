@@ -1,8 +1,8 @@
 app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', function ($scope, $location, $interval, DataService) {
-	const rowNames = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "MM", "NN", "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "VV", "WW", "XX", "YY", "ZZ"];
 	$scope.rows = ["A"];
 	$scope.columns = ["1"];
-	var coordMapping;
+    const boxWidth = 31;
+	const gridWidth = 1;
 
 	$scope.statsList = [
 	                ["Str", "Strength. Affects damage the unit deals with physical attacks.", "5px", "5px"],
@@ -15,8 +15,8 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
 	               ];
 	
 	//Interval timers
-    var rowTimer = $interval(calcNumRows, 250, 20); //attempt to get rows 20 times at 250 ms intervals (total run: 5 sec)
-    var colTimer = $interval(calcNumColumns, 250, 20);
+    //var rowTimer = $interval(calcNumRows, 250, 20); //attempt to get rows 20 times at 250 ms intervals (total run: 5 sec)
+    //var colTimer = $interval(calcNumColumns, 250, 20);
     var dragNDrop = $interval(initializeListeners, 250, 20);
     
 	//Positioning constants
@@ -27,7 +27,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     const eSklDescHorzPos = ["4px", "31px", "58px", "85px", "112px", "139px", "166px", "193px"];
     const eWpnDescVerticalPos = ["5px", "20px", "40px", "55px", "65px"];
     
-    //Constants
+    //Color constants
     const STAT_DEFAULT_COLOR = "#E5C68D";
     const STAT_BUFF_COLOR = "#42adf4";
     const STAT_DEBUFF_COLOR = "#960000";
@@ -39,68 +39,16 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
 	else{
 		$scope.charaData = DataService.getCharacters();
 		$scope.mapUrl = DataService.getMap();
+		$scope.rows = DataService.getRows();
+		$scope.columns = DataService.getColumns();
 		$scope.terrainTypes = DataService.getTerrainTypes();
-		coordMapping = DataService.getTerrainMappings();
+		$scope.terrainLocs = DataService.getTerrainMappings();
 	}
     
     //*************************\\
     // FUNCTIONS FOR MAP TILE  \\
     // GLOW BOXES              \\
     //*************************\\
-    
-    const boxWidth = 31;
-	const gridWidth = 1;
-
-    /* Using the height of the map image, calculates the number of tiles tall
-     * the map is and returns a subsection of the rowNames array of that size.
-     * Called every 250 ms for the first 5 seconds the app is open.
-     */
-    function calcNumRows(){
-    	var map = document.getElementById('map');
-    	if(map != null){
-    		var height = map.naturalHeight; //calculate the height of the map
-        	
-        	height -= (boxWidth * 2);
-        	height = height / (boxWidth + gridWidth);
-        	var temp = rowNames.slice(0, height);
-        	
-        	if(temp.length != 0){
-				$interval.cancel(rowTimer); //cancel $interval timer
-				rowTimer = null;
-				$scope.rows = temp;
-				
-				if(rowTimer == null && colTimer == null)
-					initializeTerrain();
-        	}
-    	}
-    };
-    
-   /* Using the width of the map image, calculates the number of tiles wide
-    * the map is and returns an array of that size.
-    * Called every 250 ms for the first 5 seconds the app is open.
-    */
-   function calcNumColumns(){
-    	var map = document.getElementById('map');
-    	if(map != null){
-    		var width = map.naturalWidth; //calculate the height of the map
-        	
-        	width -= (boxWidth * 3);
-        	width = width / (boxWidth + gridWidth);
-        	var temp = [];
-        	
-			for(var i = 0; i < width; i++)
-                temp.push(i+1);
-
-        	if(temp.length != 0){
-				$interval.cancel(colTimer); //cancel $interval timer
-				colTimer = null;
-				$scope.columns = temp;
-				
-				if(rowTimer == null && colTimer == null)
-					initializeTerrain();
-        	}
-    	}
-    };
     
     //Returns the vertical position of a glowBox element
     $scope.determineGlowY = function(index){
@@ -195,7 +143,10 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	var pairBox = document.getElementById(pairedUnit.unitLoc + '_box');
     
 		pairBox.style.top = currBox.offsetTop + 'px';
-    	pairBox.style.left = currBox.offsetLeft + 'px';
+		pairBox.style.left = currBox.offsetLeft + 'px';
+		
+		toggleCharRange(char, -1); //remove original char's data
+		toggleCharRange(pairedUnit.unitIndex, 1); //display new char's data
     };
     
     function locatePairedUnit(unitName){
@@ -208,7 +159,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		}
     	}
     	
-    	return {'unit' : $scope.charaData[unit], 'unitLoc' : unit };
+    	return {'unit' : $scope.charaData[unit], 'unitIndex': unit, 'unitLoc' : unit };
     };
 	
 	$scope.isNotEnemy = function(cIndex){
@@ -550,164 +501,5 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     	    
     	    $interval.cancel(dragNDrop); //cancel $interval timer
     	}
-	};
-	
-		
-	//******************\\
-	// CHARACTER RANGES \\
-	//******************\\
-
-	function initializeTerrain(){
-		$scope.terrainLocs = {};
-
-		for(var y = 0; y < $scope.columns.length; y++)
-				for(var x = 0; x < $scope.rows.length; x++)
-					$scope.terrainLocs[$scope.rows[x]+$scope.columns[y]] = getDefaultTerrainObj();
-			
-		//Update terrain types from input list
-		for(var r = 0; r < coordMapping.length; r++){
-			var row = coordMapping[r];
-			for(var c = 0; c < row.length; c++){
-				$scope.terrainLocs[$scope.rows[r]+$scope.columns[c]].type = row[c];
-			}
-		}
-
-		for(var c in $scope.charaData)
-			if($scope.terrainLocs[$scope.charaData[c].position] != undefined)
-				$scope.terrainLocs[$scope.charaData[c].position].occupiedAffiliation = c.indexOf("char_") > -1 ? "char" : "enemy";
-
-		calculateCharacterRanges();
-	};
-
-	function getDefaultTerrainObj(){
-		return {
-			'type' : "Plain",
-			'movCount' : 0,
-			'atkCount' : 0,
-			'healCount' : 0,
-			'occupiedAffiliation' : ''
-		}
-	};
-
-	function calculateCharacterRanges(){
-		for(var c in $scope.charaData){
-			var char = $scope.charaData[c];
-			var list = [];
-			var atkList = [];
-			var healList = [];
-			
-			if(char.position.length > 0){
-				var horz = $scope.rows.indexOf(char.position.match(/[a-zA-Z]+/g)[0]);
-				var vert = $scope.columns.indexOf(parseInt(char.position.match(/[0-9]+/g)[0]));
-				var range = parseInt(char.mov);
-
-				var maxAtkRange = 0;
-				var maxHealRange = 0;
-
-				for(var i in char.inventory){
-					var item = char.inventory[i];
-					var r = formatItemRange(item.range);
-					if(isAttackingItem(item.class) && r > maxAtkRange) maxAtkRange = r;
-					else if(r > maxHealRange) maxHealRange = r;
-				}
-
-				//Deal with Bifrost
-				if(maxHealRange > 7) maxHealRange = 0;
-				//if(maxHealRange > $scope.rows.length && maxHealRange > $scope.columns.length) maxHealRange = 0;
-
-				var affliliation = c.indexOf("char_") > -1 ? "char" : "enemy";
-
-				recurseRange(horz, vert, 5, maxAtkRange, maxHealRange, char.class.movType, affliliation, list, atkList, healList, "_");
-				char.range = list;
-				char.atkRange = atkList;
-				char.healRange = healList;
-			}else{			
-				char.range = [];
-				char.atkRange = [];
-				char.healRange = [];
-			}
-		}
-	};
-
-	function recurseRange(horzPos, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace){
-		var coord = $scope.rows[horzPos] + $scope.columns[vertPos];
-		
-		//Don't calculate cost for starting tile
-		if(trace.length > 1){
-			var cost = 1;
-
-			var occupiedAff = $scope.terrainLocs[coord].occupiedAffiliation;
-			var classCost = $scope.terrainTypes[$scope.terrainLocs[coord].type][terrainType];
-
-			//Unit cannot traverse tile if it has no cost or it is occupied by an enemy unit
-			if(   classCost == undefined
-			   || classCost == "-"
-			   || (occupiedAff.length > 0 && occupiedAff != affiliation)
-			){
-				recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", true);
-				recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", true);
-				return;
-			}
-			else cost = parseFloat(classCost);
-			
-			range -= cost;
-		}
-		
-		if(list.indexOf(coord) == -1) list.push(coord);
-		trace += coord + "_";
-
-		if(range <= 0){ //base case
-			recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", false);
-			recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", false);
-			return;
-		} 
-
-		if(horzPos > 0 && trace.indexOf("_" + $scope.rows[horzPos-1] + $scope.columns[vertPos] + "_") == -1)
-			recurseRange(horzPos-1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-		if(horzPos < $scope.rows.length-1 && trace.indexOf("_" + $scope.rows[horzPos+1] + $scope.columns[vertPos] + "_") == -1)
-			recurseRange(horzPos+1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-
-		if(vertPos > 0 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos-1] + "_") == -1)
-			recurseRange(horzPos, vertPos-1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-		if(vertPos < $scope.columns.length-1 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos+1] + "_") == -1)
-			recurseRange(horzPos, vertPos+1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-	};
-
-	function recurseItemRange(horzPos, vertPos, range, list, itemList, trace, countSelf){
-		if(range <= 0) return; //base case
-		var coord = $scope.rows[horzPos] + $scope.columns[vertPos];
-
-		if(countSelf || trace.length > 1){
-			//Make sure tile can be traversed by some unit
-			var classCost = $scope.terrainTypes[$scope.terrainLocs[coord].type].attack;
-			if(classCost == undefined || classCost == "-") return;
-			range -= parseFloat(classCost);
-
-			if(list.indexOf(coord) == -1 && itemList.indexOf(coord) == -1) 
-				itemList.push(coord);
-		}
-
-		trace += coord + "_";
-
-		if(horzPos > 0 && trace.indexOf("_" + $scope.rows[horzPos-1] + $scope.columns[vertPos] + "_") == -1)
-			recurseItemRange(horzPos-1, vertPos, range, list, itemList, trace, countSelf);
-		if(horzPos < $scope.rows.length-1 && trace.indexOf("_" + $scope.rows[horzPos+1] + $scope.columns[vertPos] + "_") == -1)
-			recurseItemRange(horzPos+1, vertPos, range, list, itemList, trace, countSelf);
-		
-		if(vertPos > 0 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos-1] + "_") == -1)
-			recurseItemRange(horzPos, vertPos-1, range, list, itemList, trace, countSelf);
-		if(vertPos < $scope.columns.length-1 && trace.indexOf("_" + $scope.rows[horzPos] + $scope.columns[vertPos+1] + "_") == -1)
-			recurseItemRange(horzPos, vertPos+1, range, list, itemList, trace, countSelf);
-	};
-
-	function formatItemRange(range){
-		if(range.indexOf("~") != -1 && range.length > 1)
-			range = range.substring(range.indexOf("~")+1, range.length);
-		range = range.trim();
-		return range.match(/^[0-9]+$/) != null ? parseInt(range) : 0;
-	};
-
-	function isAttackingItem(wpnClass){
-		return wpnClass != "Staff";
 	};
 }]);

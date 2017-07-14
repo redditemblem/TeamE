@@ -1,31 +1,25 @@
 app.service('DataService', ['$rootScope', function ($rootScope) {
-	var sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
+	const rowNames = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "BB", "CC", "DD", "EE", "FF", "GG", "HH", "II", "JJ", "KK", "LL", "MM", "NN", "OO", "PP", "QQ", "RR", "SS", "TT", "UU", "VV", "WW", "XX", "YY", "ZZ"];
+	const sheetId = '1HuDE0QUc1pechu7Q9aK0z4MdIEWPyIsTRE0KC57-T5c';
 	var progress = 0;
 	var characters = null;
-	var map, characterData, enemyData, itemIndex, skillIndex, classIndex, terrainIndex, terrainLocs;
+	var rows = [];
+	var cols = [];
+	var map, characterData, enemyData, itemIndex, skillIndex, classIndex, terrainIndex, terrainLocs, coordMapping;
 	
 	this.getCharacters = function(){ return characters; };
 	this.getMap = function(){ return map; };
-	this.loadMapData = function(){ fetchMapUrl(); };
+	this.getRows = function(){ return rows; };
+	this.getColumns = function(){ return cols; };
 	this.getTerrainTypes = function(){ return terrainIndex; };
 	this.getTerrainMappings = function(){ return terrainLocs; };
 	
+	this.loadMapData = function(){ fetchCharacterData(); };
+	this.calculateRanges = function(){ getMapDimensions(); };
+
 	//\\//\\//\\//\\//\\//
 	// DATA AJAX CALLS  //
 	//\\//\\//\\//\\//\\//
-	
-	function fetchMapUrl(){
-      gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        majorDimension: "ROWS",
-		valueRenderOption: "FORMULA",
-        range: 'Current Map!A1:A6',
-      }).then(function(response) {
-    	 map = processImageURL(response.result.values[5][0]);
-    	 updateProgressBar();
-    	 fetchCharacterData();
-      });
-	};
 
     function fetchCharacterData() {
       gapi.client.sheets.spreadsheets.values.get({
@@ -150,11 +144,11 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 			majorDimension: "ROWS",
 			range: 'Terrain List!A2:L',
 		}).then(function(response) {
-			var rows = response.result.values;
+			var rw = response.result.values;
 			terrainIndex = {};
 
-			for(var i = 0; i < rows.length; i++){
-				var r = rows[i];
+			for(var i = 0; i < rw.length; i++){
+				var r = rw[i];
 				terrainIndex[r[0]] = {
 					'avo' : r[1] != "-" ? parseInt(r[1]) : 0,
 					'def' : r[2] != "-" ? parseInt(r[2]) : 0,
@@ -181,7 +175,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 			majorDimension: "ROWS",
 			range: 'Terrain Coordinates!A:ZZ',
 	    }).then(function(response) {
-			terrainLocs = response.result.values;
+			coordMapping = response.result.values;
 
 			updateProgressBar();
 			processCharacters();
@@ -364,7 +358,22 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     	};
 
 		updateProgressBar();
-    };
+		fetchMapUrl();
+	};
+	
+	//Fetch map last so all data is finished when it comes time to calc ranges
+	function fetchMapUrl(){
+      gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        majorDimension: "ROWS",
+		valueRenderOption: "FORMULA",
+        range: 'Current Map!A1:A6',
+      }).then(function(response) {
+		 map = processImageURL(response.result.values[5][0]);
+    	 updateProgressBar();
+    	 fetchCharacterData();
+      });
+	};
 
     //\\//\\//\\//\\//\\//
 	// HELPER FUNCTIONS //
@@ -372,8 +381,8 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
 	function updateProgressBar(){
 		if(progress < 100){
-			progress = progress + 7.8; //12 calls
-    		$rootScope.$broadcast('loading-bar-updated', progress);
+			progress = progress + 7.2; //14 calls
+    		$rootScope.$broadcast('loading-bar-updated', progress, map);
 		}
     };
 
@@ -500,5 +509,187 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     			return [classIndex[i][0], classIndex[i][42]];
     	}
     	return [name + "(M)", "Foot"];
+	};
+		
+		
+	//******************\\
+	// CHARACTER RANGES \\
+	//******************\\
+
+	const boxWidth = 31;
+	const gridWidth = 1;
+
+	function getMapDimensions(){
+    	var map = document.getElementById('mapImg');
+		var height = map.naturalHeight; //calculate the height of the map
+        	
+		height -= (boxWidth * 2);
+		height = height / (boxWidth + gridWidth);
+		rows = rowNames.slice(0, height);
+			
+		var width = map.naturalWidth; //calculate the width of the map
+		width -= (boxWidth * 3);
+		width = width / (boxWidth + gridWidth);
+		
+		for(var i = 0; i < width; i++)
+			cols.push(i+1);
+
+		initializeTerrain();
+	};
+
+	function initializeTerrain(){
+		terrainLocs = {};
+
+		for(var y = 0; y < cols.length; y++)
+				for(var x = 0; x < rows.length; x++)
+					terrainLocs[rows[x]+cols[y]] = getDefaultTerrainObj();
+			
+		//Update terrain types from input list
+		for(var r = 0; r < coordMapping.length; r++){
+			var row = coordMapping[r];
+			for(var c = 0; c < cols.length; c++){
+				terrainLocs[rows[r]+cols[c]].type = row[c];
+			}
+		}
+
+		for(var c in characters)
+			if(terrainLocs[characters[c].position] != undefined)
+				terrainLocs[characters[c].position].occupiedAffiliation = c.indexOf("char_") > -1 ? "char" : "enemy";
+
+		calculateCharacterRanges();
+	};
+
+	function getDefaultTerrainObj(){
+		return {
+			'type' : "Plain",
+			'movCount' : 0,
+			'atkCount' : 0,
+			'healCount' : 0,
+			'occupiedAffiliation' : ''
+		}
+	};
+
+	function calculateCharacterRanges(){
+		for(var c in characters){
+			var char = characters[c];
+			var list = [];
+			var atkList = [];
+			var healList = [];
+			
+			if(char.position.length > 0){
+				var horz = rows.indexOf(char.position.match(/[a-zA-Z]+/g)[0]);
+				var vert = cols.indexOf(parseInt(char.position.match(/[0-9]+/g)[0]));
+				var range = parseInt(char.mov);
+
+				var maxAtkRange = 0;
+				var maxHealRange = 0;
+
+				for(var i in char.inventory){
+					var item = char.inventory[i];
+					var r = formatItemRange(item.range);
+					if(isAttackingItem(item.class) && r > maxAtkRange) maxAtkRange = r;
+					else if(r > maxHealRange) maxHealRange = r;
+				}
+
+				//Deal with Bifrost
+				if(maxHealRange > rows.length && maxHealRange > cols.length) maxHealRange = 0;
+
+				var affliliation = c.indexOf("char_") > -1 ? "char" : "enemy";
+
+				recurseRange(horz, vert, range, maxAtkRange, maxHealRange, char.class.movType, affliliation, list, atkList, healList, "_");
+				char.range = list;
+				char.atkRange = atkList;
+				char.healRange = healList;
+			}else{			
+				char.range = [];
+				char.atkRange = [];
+				char.healRange = [];
+			}
+		}
+
+		//Finish load
+		updateProgressBar();
+	};
+
+	function recurseRange(horzPos, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace){
+		var coord = rows[horzPos] + cols[vertPos];
+		
+		//Don't calculate cost for starting tile
+		if(trace.length > 1){
+			var cost = 1;
+
+			var occupiedAff = terrainLocs[coord].occupiedAffiliation;
+			var classCost = terrainIndex[terrainLocs[coord].type][terrainType];
+
+			//Unit cannot traverse tile if it has no cost or it is occupied by an enemy unit
+			if(   classCost == undefined
+			   || classCost == "-"
+			   || (occupiedAff.length > 0 && occupiedAff != affiliation)
+			){
+				//recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", true);
+				//recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", true);
+				return;
+			}
+			else cost = parseFloat(classCost);
+			
+			range -= cost;
+		}
+		
+		if(list.indexOf(coord) == -1) list.push(coord);
+		trace += coord + "_";
+
+		if(range <= 0){ //base case
+			//recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", false);
+			//recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", false);
+			return;
+		} 
+
+		if(horzPos > 0 && trace.indexOf("_" + rows[horzPos-1] + cols[vertPos] + "_") == -1)
+			recurseRange(horzPos-1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+		if(horzPos < rows.length-1 && trace.indexOf("_" + rows[horzPos+1] + cols[vertPos] + "_") == -1)
+			recurseRange(horzPos+1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+
+		if(vertPos > 0 && trace.indexOf("_" + rows[horzPos] + cols[vertPos-1] + "_") == -1)
+			recurseRange(horzPos, vertPos-1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+		if(vertPos < cols.length-1 && trace.indexOf("_" + rows[horzPos] + cols[vertPos+1] + "_") == -1)
+			recurseRange(horzPos, vertPos+1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+	};
+
+	function recurseItemRange(horzPos, vertPos, range, list, itemList, trace, countSelf){
+		if(range <= 0) return; //base case
+		var coord = rows[horzPos] + cols[vertPos];
+
+		if(countSelf || trace.length > 1){
+			//Make sure tile can be traversed by some unit
+			var classCost = terrainIndex[terrainLocs[coord].type].attack;
+			if(classCost == undefined || classCost == "-") return;
+			range -= parseFloat(classCost);
+
+			if(list.indexOf(coord) == -1 && itemList.indexOf(coord) == -1) 
+				itemList.push(coord);
+		}
+
+		trace += coord + "_";
+
+		if(horzPos > 0 && trace.indexOf("_" + rows[horzPos-1] + cols[vertPos] + "_") == -1)
+			recurseItemRange(horzPos-1, vertPos, range, list, itemList, trace, countSelf);
+		if(horzPos < rows.length-1 && trace.indexOf("_" + rows[horzPos+1] + cols[vertPos] + "_") == -1)
+			recurseItemRange(horzPos+1, vertPos, range, list, itemList, trace, countSelf);
+		
+		if(vertPos > 0 && trace.indexOf("_" + rows[horzPos] + cols[vertPos-1] + "_") == -1)
+			recurseItemRange(horzPos, vertPos-1, range, list, itemList, trace, countSelf);
+		if(vertPos < cols.length-1 && trace.indexOf("_" + rows[horzPos] + cols[vertPos+1] + "_") == -1)
+			recurseItemRange(horzPos, vertPos+1, range, list, itemList, trace, countSelf);
+	};
+
+	function formatItemRange(range){
+		if(range.indexOf("~") != -1 && range.length > 1)
+			range = range.substring(range.indexOf("~")+1, range.length);
+		range = range.trim();
+		return range.match(/^[0-9]+$/) != null ? parseInt(range) : 0;
+	};
+
+	function isAttackingItem(wpnClass){
+		return wpnClass != "Staff";
 	};
 }]);
