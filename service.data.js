@@ -587,16 +587,14 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 				for(var i in char.inventory){
 					var item = char.inventory[i];
 					var r = formatItemRange(item.range);
-					if(isAttackingItem(item.class) && r > maxAtkRange) maxAtkRange = r;
-					else if(r > maxHealRange) maxHealRange = r;
+					if(isAttackingItem(item.class) && r > maxAtkRange && r <= 5) maxAtkRange = r;
+					else if(!isAttackingItem(item.class) && r > maxHealRange && r <= 5) maxHealRange = r;
 				}
-
-				//Deal with Bifrost
-				if(maxHealRange > rows.length && maxHealRange > cols.length) maxHealRange = 0;
+				if(maxAtkRange > maxHealRange) maxHealRange = 0;
 
 				var affliliation = c.indexOf("char_") > -1 ? "char" : "enemy";
 
-				recurseRange(horz, vert, range, maxAtkRange, maxHealRange, char.class.movType, affliliation, list, atkList, healList, "_");
+				recurseRange(0, horz, vert, range, maxAtkRange, maxHealRange, char.class.movType, affliliation, list, atkList, healList, "_");
 				char.range = list;
 				char.atkRange = atkList;
 				char.healRange = healList;
@@ -611,75 +609,68 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 		updateProgressBar();
 	};
 
-	function recurseRange(horzPos, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace){
+	function recurseRange(mode, horzPos, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace){
 		var coord = rows[horzPos] + cols[vertPos];
-		
-		//Don't calculate cost for starting tile
-		if(trace.length > 1){
-			var cost = 1;
+		var tile = terrainLocs[coord];
 
-			var occupiedAff = terrainLocs[coord].occupiedAffiliation;
-			var classCost = terrainIndex[terrainLocs[coord].type][terrainType];
+		//Mov mode calcs
+		if(trace.length > 1 && mode == 0){
+			var classCost = terrainIndex[tile.type][terrainType];
 
 			//Unit cannot traverse tile if it has no cost or it is occupied by an enemy unit
-			if(   classCost == undefined
-			   || classCost == "-"
-			   || (occupiedAff.length > 0 && occupiedAff != affiliation)
+            if(   classCost == undefined
+               || classCost == "-"
+               || (tile.occupiedAffiliation.length > 0 && tile.occupiedAffiliation != affiliation)
 			){
-				//recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", true);
-				//recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", true);
-				return;
+				if(atkRange > 0){ range = atkRange; mode = 1; }
+				else if(healRange > 0){ range = healRange; mode = 2; }
+				else return;
 			}
-			else cost = parseFloat(classCost);
-			
-			range -= cost;
+			else range -= parseFloat(classCost);
 		}
-		
-		if(list.indexOf(coord) == -1) list.push(coord);
-		trace += coord + "_";
 
-		if(range <= 0){ //base case
-			//recurseItemRange(horzPos, vertPos, atkRange, list, atkList, "_", false);
-			//recurseItemRange(horzPos, vertPos, healRange, list, healList, "_", false);
-			return;
-		} 
-
-		if(horzPos > 0 && trace.indexOf("_" + rows[horzPos-1] + cols[vertPos] + "_") == -1)
-			recurseRange(horzPos-1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-		if(horzPos < rows.length-1 && trace.indexOf("_" + rows[horzPos+1] + cols[vertPos] + "_") == -1)
-			recurseRange(horzPos+1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-
-		if(vertPos > 0 && trace.indexOf("_" + rows[horzPos] + cols[vertPos-1] + "_") == -1)
-			recurseRange(horzPos, vertPos-1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-		if(vertPos < cols.length-1 && trace.indexOf("_" + rows[horzPos] + cols[vertPos+1] + "_") == -1)
-			recurseRange(horzPos, vertPos+1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
-	};
-
-	function recurseItemRange(horzPos, vertPos, range, list, itemList, trace, countSelf){
-		if(range <= 0) return; //base case
-		var coord = rows[horzPos] + cols[vertPos];
-
-		if(countSelf || trace.length > 1){
-			//Make sure tile can be traversed by some unit
+		//Attack/heal mode calcs
+		if(mode > 0){
 			var classCost = terrainIndex[terrainLocs[coord].type].attack;
 			if(classCost == undefined || classCost == "-") return;
 			range -= parseFloat(classCost);
-
-			if(list.indexOf(coord) == -1 && itemList.indexOf(coord) == -1) 
-				itemList.push(coord);
 		}
 
+		if(mode == 0 && list.indexOf(coord) == -1) list.push(coord);
+		else if(mode == 1 && atkList.indexOf(coord) == -1) atkList.push(coord);
+		else if(healList.indexOf(coord) == -1) healList.push(coord);
+		
 		trace += coord + "_";
 
-		if(horzPos > 0 && trace.indexOf("_" + rows[horzPos-1] + cols[vertPos] + "_") == -1)
-			recurseItemRange(horzPos-1, vertPos, range, list, itemList, trace, countSelf);
-		if(horzPos < rows.length-1 && trace.indexOf("_" + rows[horzPos+1] + cols[vertPos] + "_") == -1)
-			recurseItemRange(horzPos+1, vertPos, range, list, itemList, trace, countSelf);
-		
-		if(vertPos > 0 && trace.indexOf("_" + rows[horzPos] + cols[vertPos-1] + "_") == -1)
-			recurseItemRange(horzPos, vertPos-1, range, list, itemList, trace, countSelf);
-		if(vertPos < cols.length-1 && trace.indexOf("_" + rows[horzPos] + cols[vertPos+1] + "_") == -1)
-			recurseItemRange(horzPos, vertPos+1, range, list, itemList, trace, countSelf);
+		if(range <= 0){ //base case
+			if(mode == 0 && atkRange > 0){ range = atkRange; mode = 1; }
+			else if(mode != 2 && healRange > 0){ 
+				if(mode == 0) range = healRange;
+				else range = healRange - atkRange;
+				mode = 2; 
+			}
+			else return;
+		} 
+
+		if(horzPos > 0 && trace.indexOf("_"+rows[horzPos-1]+cols[vertPos]+"_") == -1 &&
+			(mode == 0 || (list.indexOf("_"+rows[horzPos-1] + cols[vertPos]+"_") == -1 && 
+				(mode == 1 || atkList.indexOf("_"+rows[horzPos-1] + cols[vertPos]+"_") == -1))))
+			recurseRange(mode, horzPos-1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+
+		if(horzPos < rows.length - 1 && trace.indexOf("_"+rows[horzPos+1] + cols[vertPos]+"_") == -1 &&
+			(mode == 0 || (list.indexOf("_"+rows[horzPos+1] + cols[vertPos]+"_") == -1 && 
+				(mode == 1 || atkList.indexOf("_"+rows[horzPos+1] + cols[vertPos]+"_") == -1))))
+			recurseRange(mode, horzPos+1, vertPos, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+
+		if(vertPos > 0 && trace.indexOf("_"+rows[horzPos] + cols[vertPos-1]+"_") == -1 &&
+			(mode == 0 || (list.indexOf("_"+rows[horzPos] + cols[vertPos-1]+"_") == -1 && 
+				(mode == 1 || atkList.indexOf("_"+rows[horzPos] + cols[vertPos-1]+"_") == -1))))
+			recurseRange(mode, horzPos, vertPos-1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
+
+		if(vertPos < cols.length - 1 && trace.indexOf("_"+rows[horzPos] + cols[vertPos+1]+"_") == -1 &&
+			(mode == 0 || (list.indexOf("_"+rows[horzPos] + cols[vertPos+1]+"_") == -1 && 
+				(mode == 1 || atkList.indexOf("_"+rows[horzPos] + cols[vertPos+1]+"_") == -1))))
+			recurseRange(mode, horzPos, vertPos+1, range, atkRange, healRange, terrainType, affiliation, list, atkList, healList, trace);
 	};
 
 	function formatItemRange(range){
