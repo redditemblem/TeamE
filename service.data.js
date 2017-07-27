@@ -381,7 +381,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     
 	function updateProgressBar(){
 		if(progress < 100){
-			progress = progress + 7.2; //14 calls
+			progress = progress + 5.9; //17 calls
     		$rootScope.$broadcast('loading-bar-updated', progress, map);
 		}
     };
@@ -508,7 +508,7 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
     		if(name == classIndex[i][0])
     			return [classIndex[i][0], classIndex[i][42]];
     	}
-    	return [name + "(M)", "Foot"];
+    	return [name, "Foot"];
 	};
 		
 		
@@ -552,11 +552,17 @@ app.service('DataService', ['$rootScope', function ($rootScope) {
 			}
 		}
 
-		for(var c in characters)
+		for(var c in characters){
 			if(terrainLocs[characters[c].position] != undefined)
 				terrainLocs[characters[c].position].occupiedAffiliation = c.indexOf("char_") > -1 ? "char" : "enemy";
+			
+			characters[c].range = [];
+			characters[c].atkRange = [];
+			characters[c].healRange = [];
+		}
 
-		calculateCharacterRanges();
+		updateProgressBar();
+		//calculateCharacterRanges();
 	};
 
 	function getDefaultTerrainObj(){

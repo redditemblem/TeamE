@@ -146,7 +146,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
 		pairBox.style.left = currBox.offsetLeft + 'px';
 		
 		toggleCharRange(char, -1); //remove original char's data
-		toggleCharRange(pairedUnit.unitIndex, 1); //display new char's data
+		toggleCharRange(pairedUnit.unitLoc, 1); //display new char's data
     };
     
     function locatePairedUnit(unitName){
@@ -159,7 +159,7 @@ app.controller('HomeCtrl', ['$scope', '$location', '$interval', 'DataService', f
     		}
     	}
     	
-    	return {'unit' : $scope.charaData[unit], 'unitIndex': unit, 'unitLoc' : unit };
+    	return {'unit' : $scope.charaData[unit], 'unitLoc' : unit };
     };
 	
 	$scope.isNotEnemy = function(cIndex){
